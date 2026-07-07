@@ -1,0 +1,134 @@
+# PillarPop Product Spec v0.1
+
+## Product Idea
+
+PillarPop is an international Saju app that turns a corrected Four Pillars chart into a detailed, emotionally resonant English reading. The product keeps the low-price, high-detail feeling of Korean micro-fortune services, but adds education for users who are new to Saju.
+
+## Core Promise
+
+Enter your birth date, birth time, birthplace, and timezone. PillarPop calculates a corrected Korean Four Pillars chart, explains the technical markers, and translates them into a detailed reading across personality, career, money, love, family, friends, location, timing, and lucky habits.
+
+## Target Users
+
+- Astrology-curious Gen Z and millennials.
+- K-culture fans who want a Korean metaphysical system beyond Western zodiac.
+- BaZi/Four Pillars learners who want softer, consumer-friendly English.
+- Couples, friends, founders, and creators who want compatibility readings.
+- Users who are willing to pay a small price for a detailed novelty/self-reflection report.
+
+## Positioning
+
+PillarPop should sit between:
+
+- `Traditional` - uses real Saju concepts and chart logic.
+- `Accessible` - explains unfamiliar terms as it goes.
+- `Emotional` - gives users memorable language about themselves.
+- `Affordable` - a $0.99 entry product keeps the first purchase friction low.
+- `Beautiful` - the interface feels like a nostalgic, glossy digital charm.
+
+## International Naming
+
+Recommended naming system:
+
+- Brand: `PillarPop`
+- Main product: `$0.99 Birth Chart`
+- Credits: `Star Credits`
+- Chat upsell: `Ask The Reader`
+- Saved readings: `Vault`
+- Daily free reading: `Daily Spark`
+
+## Input System
+
+Required fields:
+
+- Name or nickname.
+- Birth date.
+- Birth time.
+- Birthplace.
+- Birth calendar: Gregorian, lunar, unknown.
+- Time accuracy: exact, approximate, unknown.
+- Optional relationship role: self, friend, partner, family, client.
+
+Critical calculation requirement:
+
+- Store original local birth time.
+- Resolve birthplace to timezone.
+- Correct daylight saving time when relevant.
+- Apply longitude-based solar-time correction when enabled.
+- Show a transparent `time correction receipt` in the technical chart view.
+
+## Main Screen Structure
+
+1. Top app bar: brand, mode toggle, primary action.
+2. Birth input panel: date, time, city, correction status.
+3. Product rail: $0.99 reading, compatibility, decade, date picker, year ahead, daily free, ask.
+4. Chart preview: Four Pillars, Ten Gods, hidden stems, life stages.
+5. Reading preview: accordion sections with polished titles.
+6. Glossary drawer/section: Saju basics, chart parts, stars, branch dynamics.
+7. Bottom mobile navigation.
+
+## Reading Sections
+
+Default report sections:
+
+- Core Metaphor
+- Five Element Balance
+- Day Master And Identity
+- Reality Check
+- Warm Validation
+- Personality
+- Career
+- Money
+- Love
+- Family
+- Friends
+- Travel And Location
+- Lucky Actions
+
+## Content Logic
+
+The writing engine should separate objective markers from prose:
+
+- Objective markers: element counts, day master, month branch, Ten Gods, hidden stems, combinations, clashes, harms, punishments, Shinsal, luck cycles.
+- Interpretation layer: use templates and LLM rewriting to create human prose.
+- Guardrails: no diagnosis, no guaranteed outcome, no financial instruction framed as certainty.
+
+## UI Modes
+
+The prototype uses three label modes:
+
+- `Simple` - plain-English labels only.
+- `Technical` - Korean/Chinese concepts with English translation.
+- `Poetic` - consumer-facing metaphors and warmer titles.
+
+Future implementation should persist this preference per user.
+
+## Visual Direction
+
+The interface should combine:
+
+- Y2K: chrome highlights, glossy buttons, high-contrast accent colors, pixel-grid texture.
+- Frutiger Aero: glassy panels, optimistic aqua, breathable whitespace, soft reflections.
+- Modern app UX: compact cards, segmented controls, clear CTAs, mobile-first nav.
+
+Avoid:
+
+- Heavy mystic cliches.
+- Dark purple-only astrology palettes.
+- Overly serious occult branding.
+- Long educational blocks before the user can interact.
+
+## Safety And Trust
+
+Include these trust elements:
+
+- Cultural explanation of Korean Saju.
+- Transparent time correction.
+- Clear refund/support entry.
+- Privacy note for birth data.
+- Entertainment and self-reflection disclaimer.
+
+Suggested disclaimer:
+
+> Saju is a traditional interpretive system used for reflection and entertainment. PillarPop does not provide medical, legal, financial, or psychological advice.
+

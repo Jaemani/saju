@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 520" role="img" aria-labelledby="title desc">
+  <title id="title">Four Pillars orbit chart</title>
+  <desc id="desc">A glossy Y2K-inspired Four Pillars chart wheel with stems, branches, and element colors.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#d9fff7"/>
+      <stop offset="0.38" stop-color="#fff8a8"/>
+      <stop offset="0.72" stop-color="#ffd1f0"/>
+      <stop offset="1" stop-color="#bde7ff"/>
+    </linearGradient>
+    <linearGradient id="chrome" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.16" stop-color="#95f5ff"/>
+      <stop offset="0.33" stop-color="#f7fbff"/>
+      <stop offset="0.54" stop-color="#ff8bdc"/>
+      <stop offset="0.72" stop-color="#fff06a"/>
+      <stop offset="1" stop-color="#8ad7ff"/>
+    </linearGradient>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#0e2440" flood-opacity="0.22"/>
+    </filter>
+    <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse">
+      <path d="M 28 0 L 0 0 0 28" fill="none" stroke="#5a6a7d" stroke-opacity="0.16" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="720" height="520" rx="42" fill="url(#bg)"/>
+  <rect width="720" height="520" rx="42" fill="url(#grid)"/>
+  <g filter="url(#softShadow)">
+    <ellipse cx="360" cy="260" rx="226" ry="126" fill="#ffffff" opacity="0.36"/>
+    <ellipse cx="360" cy="260" rx="212" ry="112" fill="none" stroke="url(#chrome)" stroke-width="18"/>
+    <ellipse cx="360" cy="260" rx="152" ry="78" fill="none" stroke="#0f213a" stroke-opacity="0.22" stroke-width="2"/>
+    <circle cx="360" cy="260" r="86" fill="#f8feff" stroke="#0f213a" stroke-opacity="0.18" stroke-width="2"/>
+    <circle cx="360" cy="260" r="58" fill="#171d2f"/>
+  </g>
+  <g font-family="Inter, Arial, sans-serif" text-anchor="middle">
+    <text x="360" y="246" font-size="18" font-weight="700" fill="#d8fff9">DAY MASTER</text>
+    <text x="360" y="285" font-size="46" font-weight="900" fill="#ffffff">BING</text>
+  </g>
+  <g font-family="Inter, Arial, sans-serif" font-weight="900" text-anchor="middle">
+    <g transform="translate(174 174)">
+      <rect x="-58" y="-42" width="116" height="84" rx="14" fill="#fff" opacity="0.86" stroke="#171d2f" stroke-opacity="0.18"/>
+      <text y="-7" font-size="34" fill="#ff4fa7">壬</text>
+      <text y="25" font-size="16" fill="#171d2f">Year</text>
+    </g>
+    <g transform="translate(546 174)">
+      <rect x="-58" y="-42" width="116" height="84" rx="14" fill="#fff" opacity="0.86" stroke="#171d2f" stroke-opacity="0.18"/>
+      <text y="-7" font-size="34" fill="#1aa2ff">癸</text>
+      <text y="25" font-size="16" fill="#171d2f">Hour</text>
+    </g>
+    <g transform="translate(174 346)">
+      <rect x="-58" y="-42" width="116" height="84" rx="14" fill="#fff" opacity="0.86" stroke="#171d2f" stroke-opacity="0.18"/>
+      <text y="-7" font-size="34" fill="#35b66a">寅</text>
+      <text y="25" font-size="16" fill="#171d2f">Month</text>
+    </g>
+    <g transform="translate(546 346)">
+      <rect x="-58" y="-42" width="116" height="84" rx="14" fill="#fff" opacity="0.86" stroke="#171d2f" stroke-opacity="0.18"/>
+      <text y="-7" font-size="34" fill="#ff7b2f">午</text>
+      <text y="25" font-size="16" fill="#171d2f">Day</text>
+    </g>
+  </g>
+  <path d="M122 92 C228 38 498 42 606 102" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity="0.68"/>
+  <path d="M112 426 C246 482 489 478 610 420" fill="none" stroke="#171d2f" stroke-width="3" stroke-linecap="round" opacity="0.16"/>
+</svg>
+

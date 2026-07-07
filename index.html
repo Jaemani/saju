@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PillarPop - Korean Four Pillars</title>
+    <meta
+      name="description"
+      content="International Saju prototype for Korean Four Pillars readings with glossary, chart preview, and Y2K x Gen Z UI."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="app-shell topbar" aria-label="Main navigation">
+      <a class="brand" href="#top" aria-label="PillarPop home">
+        <span class="brand-mark">四</span>
+        <span>
+          <strong>PillarPop</strong>
+          <small>Korean Four Pillars</small>
+        </span>
+      </a>
+      <nav class="nav-links" aria-label="Sections">
+        <a href="#readings">Readings</a>
+        <a href="#chart">Chart</a>
+        <a href="#glossary">Glossary</a>
+        <a href="#notes">Trust</a>
+      </nav>
+      <button class="chrome-btn" type="button" data-scroll="#birth-form">Start $0.99</button>
+    </header>
+
+    <main id="top">
+      <section class="app-shell workbench" aria-labelledby="workspace-title">
+        <div class="intro-panel">
+          <div class="eyebrow">Birth data -> corrected chart -> beautiful reading</div>
+          <h1 id="workspace-title">A Korean Saju reading that explains the chart while it reads you.</h1>
+          <p>
+            PillarPop turns your birth date, time, and place into a corrected Four Pillars chart, then
+            translates stems, branches, Ten Gods, symbolic stars, and timing cycles into warm English.
+          </p>
+          <div class="mode-switch" aria-label="Label mode">
+            <button class="mode-pill active" type="button" data-mode="simple">Simple</button>
+            <button class="mode-pill" type="button" data-mode="technical">Technical</button>
+            <button class="mode-pill" type="button" data-mode="poetic">Poetic</button>
+          </div>
+        </div>
+
+        <form class="birth-panel" id="birth-form">
+          <div class="panel-title">
+            <span>Birth Setup</span>
+            <strong>Time correction ready</strong>
+          </div>
+          <label>
+            Name
+            <input id="nameInput" type="text" value="Mina" maxlength="24" />
+          </label>
+          <div class="input-grid">
+            <label>
+              Date
+              <input type="date" value="2000-07-29" />
+            </label>
+            <label>
+              Time
+              <input type="time" value="22:01" />
+            </label>
+          </div>
+          <label>
+            Birthplace
+            <input type="text" value="Los Angeles, United States" />
+          </label>
+          <div class="input-grid">
+            <label>
+              Calendar
+              <select>
+                <option>Gregorian</option>
+                <option>Lunar</option>
+                <option>Unknown</option>
+              </select>
+            </label>
+            <label>
+              Accuracy
+              <select>
+                <option>Exact time</option>
+                <option>Approximate</option>
+                <option>Unknown time</option>
+              </select>
+            </label>
+          </div>
+          <div class="receipt">
+            <span>UTC offset detected</span>
+            <strong>-07:00</strong>
+            <span>Solar-time adjustment</span>
+            <strong>+7 min</strong>
+          </div>
+          <button class="primary-btn" type="button">Preview My Pillars</button>
+        </form>
+      </section>
+
+      <section class="app-shell product-band" id="readings" aria-labelledby="readings-title">
+        <div class="section-heading">
+          <p>Pick a reading</p>
+          <h2 id="readings-title">$0.99 entry products with premium-feeling detail.</h2>
+        </div>
+        <div class="category-tabs" aria-label="Reading categories">
+          <button class="category-tab active" type="button" data-filter="all">All</button>
+          <button class="category-tab" type="button" data-filter="saju">Saju</button>
+          <button class="category-tab" type="button" data-filter="timing">Timing</button>
+          <button class="category-tab" type="button" data-filter="chat">Ask</button>
+        </div>
+        <div class="product-grid">
+          <article class="product-card hot" data-category="saju">
+            <div class="badge">NEW</div>
+            <h3>$0.99 Birth Chart</h3>
+            <p>Your personality, money, work, love, family, location, and lucky actions.</p>
+            <span>1 Star Credit</span>
+            <button type="button">See Reading</button>
+          </article>
+          <article class="product-card" data-category="saju">
+            <div class="badge muted">DUO</div>
+            <h3>Compatibility Remix</h3>
+            <p>For partners, friends, founders, roommates, and situationships.</p>
+            <span>1 Star Credit</span>
+            <button type="button">Compare Charts</button>
+          </article>
+          <article class="product-card" data-category="timing">
+            <div class="badge muted">ROADMAP</div>
+            <h3>10-Year Luck Cycle</h3>
+            <p>Decade-scale timing: when to push, pause, move, build, or reset.</p>
+            <span>Partly Free</span>
+            <button type="button">Open Cycle</button>
+          </article>
+          <article class="product-card" data-category="timing">
+            <div class="badge muted">DATE</div>
+            <h3>Lucky Date Picker</h3>
+            <p>Choose dates for launches, moves, weddings, contracts, and openings.</p>
+            <span>Partly Free</span>
+            <button type="button">Pick A Date</button>
+          </article>
+          <article class="product-card" data-category="timing">
+            <div class="badge muted">YEAR</div>
+            <h3>Year Ahead</h3>
+            <p>Annual theme, monthly rhythm, pressure points, and lucky windows.</p>
+            <span>Partly Free</span>
+            <button type="button">View Year</button>
+          </article>
+          <article class="product-card" data-category="chat">
+            <div class="badge muted">ASK</div>
+            <h3>Ask The Reader</h3>
+            <p>Ask follow-up questions in plain English after your report.</p>
+            <span>1 Moon Credit</span>
+            <button type="button">Start Chat</button>
+          </article>
+        </div>
+      </section>
+
+      <section class="chart-band" id="chart" aria-labelledby="chart-title">
+        <div class="app-shell chart-layout">
+          <div>
+            <div class="section-heading compact">
+              <p>Manse calendar view</p>
+              <h2 id="chart-title">The objective chart stays visible before the poetic reading starts.</h2>
+            </div>
+            <img class="chart-art" src="assets/pillars-orbit.svg" alt="Glossy Four Pillars orbit chart" />
+          </div>
+          <div class="pillar-table" aria-label="Four Pillars sample table">
+            <div class="pillar-row header">
+              <span>Hour</span>
+              <span>Day</span>
+              <span>Month</span>
+              <span>Year</span>
+            </div>
+            <div class="pillar-row stems">
+              <span><b>癸</b><small>Gui Water</small></span>
+              <span><b>戊</b><small>Wu Earth</small></span>
+              <span><b>癸</b><small>Stable Wealth</small></span>
+              <span><b>庚</b><small>Talent Star</small></span>
+            </div>
+            <div class="pillar-row branches">
+              <span><b>亥</b><small>Pig</small></span>
+              <span><b>子</b><small>Rat</small></span>
+              <span><b>未</b><small>Goat</small></span>
+              <span><b>辰</b><small>Dragon</small></span>
+            </div>
+            <div class="chart-tags">
+              <button type="button" data-term="Day Master">Day Master</button>
+              <button type="button" data-term="Hidden Stems">Hidden Stems</button>
+              <button type="button" data-term="Ten Gods">Ten Gods</button>
+              <button type="button" data-term="Symbolic Stars">Symbolic Stars</button>
+              <button type="button" data-term="Zi-Wei Harm">Zi-Wei Harm</button>
+              <button type="button" data-term="Ghost Gate">Ghost Gate</button>
+            </div>
+            <div class="term-pop" id="termPop">Tap a chart chip to see the plain-English meaning.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="app-shell reading-band" aria-labelledby="sample-title">
+        <div class="section-heading">
+          <p>Sample reading style</p>
+          <h2 id="sample-title"><span id="readerName">Mina</span>'s chart is translated into detail, not dumped as jargon.</h2>
+        </div>
+        <div class="accordion-list">
+          <article class="reading-item open">
+            <button class="accordion-trigger" type="button">
+              A quiet mountain with a deep ocean moving inside
+              <span>+</span>
+            </button>
+            <div class="accordion-body">
+              Your Day Master is Yang Earth, so the reading starts with steadiness, loyalty, and the need
+              to feel grounded. But the chart carries a strong Water signature, which adds emotional depth,
+              financial instinct, and private waves of worry. The result is a person who looks composed
+              from the outside while running a full strategy room inside.
+            </div>
+          </article>
+          <article class="reading-item">
+            <button class="accordion-trigger" type="button">
+              Water is strong, so warmth becomes the life hack
+              <span>+</span>
+            </button>
+            <div class="accordion-body">
+              Water can bring memory, sensitivity, and flexible intelligence. When it becomes too strong,
+              it may create hesitation or emotional over-processing. Fire habits help: morning light,
+              visible goals, warmer colors, active movement, and people who make decisions feel less heavy.
+            </div>
+          </article>
+          <article class="reading-item">
+            <button class="accordion-trigger" type="button">
+              Money sense is real, but boundaries protect it
+              <span>+</span>
+            </button>
+            <div class="accordion-body">
+              Stable Wealth and Dynamic Wealth themes suggest practical instincts around resources. The
+              growth edge is not earning potential; it is protecting your attention, time, and emotional
+              labor so money choices do not become people-pleasing choices.
+            </div>
+          </article>
+          <article class="reading-item">
+            <button class="accordion-trigger" type="button">
+              Relationship luck improves when suspicion becomes language
+              <span>+</span>
+            </button>
+            <div class="accordion-body">
+              Irritation and Ghost Gate markers can make you notice tiny changes in tone. That perception
+              is a gift when it becomes communication. It becomes exhausting when it stays silent and turns
+              into tests. Say the worry early, lightly, and clearly.
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="glossary-band" id="glossary" aria-labelledby="glossary-title">
+        <div class="app-shell">
+          <div class="section-heading">
+            <p>Built-in education</p>
+            <h2 id="glossary-title">Every unfamiliar Saju marker gets an English match.</h2>
+          </div>
+          <div class="glossary-tools" aria-label="Glossary filters">
+            <button class="glossary-filter active" type="button" data-glossary="all">All</button>
+            <button class="glossary-filter" type="button" data-glossary="basic">Basics</button>
+            <button class="glossary-filter" type="button" data-glossary="gods">Ten Gods</button>
+            <button class="glossary-filter" type="button" data-glossary="stars">Stars</button>
+            <button class="glossary-filter" type="button" data-glossary="links">Links</button>
+          </div>
+          <div class="glossary-grid">
+            <article class="glossary-card" data-group="basic">
+              <h3>Manse Calendar</h3>
+              <p>The perpetual calendar used to convert birth data into year, month, day, and hour pillars.</p>
+            </article>
+            <article class="glossary-card" data-group="basic">
+              <h3>Day Master</h3>
+              <p>The heavenly stem of the day pillar; the reference point for identity and Ten Gods.</p>
+            </article>
+            <article class="glossary-card" data-group="gods">
+              <h3>Stable Wealth</h3>
+              <p>Budgeting, tangible assets, salary, reliability, and practical resource management.</p>
+            </article>
+            <article class="glossary-card" data-group="gods">
+              <h3>Mystic Resource</h3>
+              <p>Intuition, unusual learning, deep analysis, private imagination, and overthinking risk.</p>
+            </article>
+            <article class="glossary-card" data-group="stars">
+              <h3>Needle Star</h3>
+              <p>Precise observation and sharp language; useful for design, medicine, research, and critique.</p>
+            </article>
+            <article class="glossary-card" data-group="stars">
+              <h3>Heavenly Noble</h3>
+              <p>Mentors, rescue energy, timely help, and the feeling that a door opens at the right moment.</p>
+            </article>
+            <article class="glossary-card" data-group="links">
+              <h3>Combination</h3>
+              <p>Two signs cooperate and may transform into another element under the right conditions.</p>
+            </article>
+            <article class="glossary-card" data-group="links">
+              <h3>Clash</h3>
+              <p>Opposition that can create conflict, movement, distance, relocation, or necessary change.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="app-shell trust-band" id="notes" aria-labelledby="trust-title">
+        <div class="trust-copy">
+          <p>Trust layer</p>
+          <h2 id="trust-title">Make the tradition legible without pretending it is science.</h2>
+          <p>
+            Saju is presented as a Korean interpretive tradition for reflection and entertainment. The
+            product should clearly explain time correction, protect birth data, and avoid medical, legal,
+            psychological, or financial certainty.
+          </p>
+        </div>
+        <div class="trust-list" aria-label="Trust checklist">
+          <span>Birthplace timezone receipt</span>
+          <span>Solar-time correction toggle</span>
+          <span>Plain-English glossary</span>
+          <span>Cultural context note</span>
+          <span>Privacy-first saved charts</span>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Mobile navigation">
+      <a href="#top">Home</a>
+      <a href="#birth-form">Add</a>
+      <a href="#readings">Shop</a>
+      <a href="#glossary">Learn</a>
+      <a href="#notes">Vault</a>
+    </nav>
+
+    <script src="script.js"></script>
+  </body>
+</html>
+
