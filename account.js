@@ -18,7 +18,7 @@ function renderAccount(user, member) {
     root.innerHTML = `
       <article class="account-card">
         <h2>Login required</h2>
-        <p>Sign in with Google, Facebook, Apple, or email to manage your SajuPop account.</p>
+      <p>Sign in with Google or email to manage your SajuPop account.</p>
         <button class="primary-btn" type="button" data-auth-action="login">Login</button>
       </article>
     `;

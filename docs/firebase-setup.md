@@ -1,6 +1,6 @@
 # Firebase Setup
 
-SajuPop uses Firebase for login and member management while Vercel remains the web/API host.
+SajuPop uses Firebase for login and member management while Vercel remains the web and API host.
 
 ## Required Firebase Products
 
@@ -12,23 +12,19 @@ SajuPop uses Firebase for login and member management while Vercel remains the w
 The app UI supports:
 
 - Google
-- Facebook
-- Apple
-- Email and password
+- Email/password
 
-Google and email can usually be enabled directly in Firebase Authentication. Facebook and Apple require provider credentials from Meta and Apple Developer before they can work in production.
+Enable both methods in Firebase Console -> Authentication -> Sign-in method.
 
 Important:
 
-- The service-account bootstrap can create the Firebase web app and sync Vercel env vars.
+- The service-account bootstrap can create the Firebase web app, sync Vercel env vars, and deploy Firestore rules.
 - Firebase Authentication itself may still need one manual console step on Spark/free projects: open Firebase Console -> Authentication -> Get started.
-- Enable Email/Password and Google in the Sign-in method tab.
-- Facebook needs Meta App ID/App Secret.
-- Apple needs Apple Developer Team ID, Key ID, Service ID, and private key.
+- Google sign-in also requires the deployed Vercel domain to be authorized in Firebase Authentication settings.
 
 ## Vercel Environment Variables
 
-Set these after creating the Firebase web app:
+These are public Firebase web config values, not admin secrets:
 
 ```txt
 FIREBASE_API_KEY=
@@ -40,7 +36,7 @@ FIREBASE_APP_ID=
 FIREBASE_MEASUREMENT_ID=
 ```
 
-The client reads them through `/api/firebase-config`; these are public Firebase web config values, not admin secrets.
+The client reads them through `/api/firebase-config`.
 
 ## Firestore Member Document
 
@@ -75,8 +71,6 @@ firebase projects:create <unique-project-id> --display-name "SajuPop"
 firebase use --add <unique-project-id>
 firebase deploy --only firestore:rules
 ```
-
-Then create a Firebase Web App in the console or with the Firebase CLI, copy its config into Vercel env vars, and redeploy Vercel.
 
 If a service account JSON is available in the project root:
 

@@ -1,9 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {
-  AppleAuthProvider,
   browserLocalPersistence,
   createUserWithEmailAndPassword,
-  FacebookAuthProvider,
   getAuth,
   GoogleAuthProvider,
   onAuthStateChanged,
@@ -38,11 +36,9 @@ function authTemplate() {
         <button class="auth-close" type="button" data-auth-action="close" aria-label="Close login">×</button>
         <p class="eyebrow">Member login</p>
         <h2 id="authTitle">Sign in to save charts and unlock checkout.</h2>
-        <p class="auth-note" id="authStatus">Choose a login method.</p>
+        <p class="auth-note" id="authStatus">Continue with Google or email.</p>
         <div class="provider-grid">
-          <button type="button" data-provider="google"><span class="provider-icon google"></span>Google</button>
-          <button type="button" data-provider="facebook"><span class="provider-icon facebook"></span>Facebook</button>
-          <button type="button" data-provider="apple"><span class="provider-icon apple"></span>Apple</button>
+          <button type="button" data-provider="google"><span class="provider-icon google"></span>Continue with Google</button>
         </div>
         <div class="email-auth">
           <label>Email<input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com" /></label>
@@ -77,10 +73,10 @@ function friendlyAuthError(error) {
   const code = error?.code || "";
   const message = error?.message || String(error || "");
   if (code.includes("configuration-not-found") || message.includes("CONFIGURATION_NOT_FOUND")) {
-    return "Firebase Auth is connected, but Authentication is not enabled in the Firebase console yet. Open Firebase Authentication, click Get started, then enable Email/Google providers.";
+    return "Firebase Auth is connected, but Authentication is not enabled in the Firebase console yet.";
   }
   if (code.includes("operation-not-allowed")) {
-    return "This sign-in provider is not enabled yet in Firebase Authentication.";
+    return "This sign-in method is not enabled yet in Firebase Authentication.";
   }
   if (code.includes("popup-blocked")) {
     return "The login popup was blocked. Allow popups for this site and try again.";
@@ -88,24 +84,23 @@ function friendlyAuthError(error) {
   if (code.includes("unauthorized-domain")) {
     return "This domain is not authorized in Firebase Authentication settings.";
   }
+  if (code.includes("wrong-password") || code.includes("invalid-credential")) {
+    return "Email or password is incorrect.";
+  }
+  if (code.includes("email-already-in-use")) {
+    return "This email already has an account. Try signing in instead.";
+  }
   return message;
 }
 
 function openAuth(options = {}) {
   state.afterLogin = options.afterLogin || null;
   qs("#authModal")?.classList.remove("hidden");
-  setStatus(state.configured ? "Choose a login method." : "Firebase is not configured yet.", !state.configured);
+  setStatus(state.configured ? "Continue with Google or email." : "Firebase is not configured yet.", !state.configured);
 }
 
 function closeAuth() {
   qs("#authModal")?.classList.add("hidden");
-}
-
-function providerFor(name) {
-  if (name === "google") return new GoogleAuthProvider();
-  if (name === "facebook") return new FacebookAuthProvider();
-  if (name === "apple") return new AppleAuthProvider();
-  throw new Error("Unsupported provider");
 }
 
 async function upsertMember(user) {
@@ -167,10 +162,12 @@ function updateAuthUI(user) {
   });
 }
 
-async function signInProvider(name) {
+async function signInGoogle() {
   if (!state.auth) throw new Error("Firebase is not configured yet.");
-  setStatus(`Opening ${name} login...`);
-  const result = await signInWithPopup(state.auth, providerFor(name));
+  setStatus("Opening Google login...");
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+  const result = await signInWithPopup(state.auth, provider);
   await upsertMember(result.user);
   closeAuth();
   if (state.afterLogin) state.afterLogin(result.user);
@@ -234,9 +231,9 @@ function bindAuthUI() {
     }
 
     const provider = event.target.closest("[data-provider]");
-    if (provider) {
+    if (provider?.dataset.provider === "google") {
       try {
-        await signInProvider(provider.dataset.provider);
+        await signInGoogle();
       } catch (error) {
         setStatus(friendlyAuthError(error), true);
       }
@@ -266,3 +263,4 @@ bindAuthUI();
 initFirebase().finally(() => {
   window.dispatchEvent(new CustomEvent("sajupop-auth-ready", { detail: { configured: state.configured } }));
 });
+

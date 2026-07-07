@@ -1437,27 +1437,6 @@ h1 {
   background: conic-gradient(#4285f4, #34a853, #fbbc05, #ea4335, #4285f4);
 }
 
-.provider-icon.facebook {
-  background: #1877f2;
-}
-
-.provider-icon.facebook::after {
-  content: "f";
-  color: #fff;
-}
-
-.provider-icon.apple {
-  background: #111;
-}
-
-.provider-icon.apple::after {
-  content: "";
-  width: 10px;
-  height: 13px;
-  border-radius: 50% 50% 45% 45%;
-  background: #fff;
-}
-
 .email-auth {
   display: grid;
   gap: 10px;
