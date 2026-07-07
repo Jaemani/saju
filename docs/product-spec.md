@@ -1,12 +1,12 @@
-# PillarPop Product Spec v0.1
+# SajuPop Product Spec v0.1
 
 ## Product Idea
 
-PillarPop is an international Saju app that turns a corrected Four Pillars chart into a detailed, emotionally resonant English reading. The product keeps the low-price, high-detail feeling of Korean micro-fortune services, but adds education for users who are new to Saju.
+SajuPop is an international Saju app that turns a corrected Four Pillars chart into a detailed, emotionally resonant English reading. The product keeps the low-price, high-detail feeling of Korean micro-fortune services, but adds education for users who are new to Saju.
 
 ## Core Promise
 
-Enter your birth date, birth time, birthplace, and timezone. PillarPop calculates a corrected Korean Four Pillars chart, explains the technical markers, and translates them into a detailed reading across personality, career, money, love, family, friends, location, timing, and lucky habits.
+Enter your birth date, birth time, birthplace, and timezone. SajuPop calculates a corrected Korean Four Pillars chart, explains the technical markers, and translates them into a detailed reading across personality, career, money, love, family, friends, location, timing, and lucky habits.
 
 ## Target Users
 
@@ -18,7 +18,7 @@ Enter your birth date, birth time, birthplace, and timezone. PillarPop calculate
 
 ## Positioning
 
-PillarPop should sit between:
+SajuPop should sit between:
 
 - `Traditional` - uses real Saju concepts and chart logic.
 - `Accessible` - explains unfamiliar terms as it goes.
@@ -30,7 +30,7 @@ PillarPop should sit between:
 
 Recommended naming system:
 
-- Brand: `PillarPop`
+- Brand: `SajuPop`
 - Main product: `$0.99 Birth Chart`
 - Credits: `Star Credits`
 - Chat upsell: `Ask The Reader`
@@ -44,7 +44,8 @@ Required fields:
 - Name or nickname.
 - Birth date.
 - Birth time.
-- Birthplace.
+- Birth country.
+- Birth city.
 - Birth calendar: Gregorian, lunar, unknown.
 - Time accuracy: exact, approximate, unknown.
 - Optional relationship role: self, friend, partner, family, client.
@@ -55,7 +56,13 @@ Critical calculation requirement:
 - Resolve birthplace to timezone.
 - Correct daylight saving time when relevant.
 - Apply longitude-based solar-time correction when enabled.
-- Show a transparent `time correction receipt` in the technical chart view.
+- Keep UTC and minute-level correction hidden from the default consumer UI.
+- Show a simplified `location correction included` message, with detailed correction available only in a technical/debug layer.
+
+Current prototype note:
+
+- The v0.2 engine uses a built-in country/city profile table plus country fallback values.
+- A production version should replace this with a verified timezone, DST, solar-term, and Manse calendar engine.
 
 ## Main Screen Structure
 
@@ -91,6 +98,7 @@ The writing engine should separate objective markers from prose:
 
 - Objective markers: element counts, day master, month branch, Ten Gods, hidden stems, combinations, clashes, harms, punishments, Shinsal, luck cycles.
 - Interpretation layer: use templates and LLM rewriting to create human prose.
+- Voice layer: run a second empathy polish pass so the output feels caring, specific, and emotionally perceptive instead of generic.
 - Guardrails: no diagnosis, no guaranteed outcome, no financial instruction framed as certainty.
 
 ## UI Modes
@@ -130,5 +138,4 @@ Include these trust elements:
 
 Suggested disclaimer:
 
-> Saju is a traditional interpretive system used for reflection and entertainment. PillarPop does not provide medical, legal, financial, or psychological advice.
-
+> Saju is a traditional interpretive system used for reflection and entertainment. SajuPop does not provide medical, legal, financial, or psychological advice.

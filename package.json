@@ -1,0 +1,9 @@
+{
+  "name": "saju-pop",
+  "version": "0.2.0",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev",
+    "smoke:reading": "node scripts/smoke-reading.mjs"
+  }
+}

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>PillarPop - Korean Four Pillars</title>
+    <title>SajuPop - Korean Four Pillars</title>
     <meta
       name="description"
       content="International Saju prototype for Korean Four Pillars readings with glossary, chart preview, and Y2K x Gen Z UI."
@@ -12,11 +12,11 @@
   </head>
   <body>
     <header class="app-shell topbar" aria-label="Main navigation">
-      <a class="brand" href="#top" aria-label="PillarPop home">
+      <a class="brand" href="#top" aria-label="SajuPop home">
         <span class="brand-mark">四</span>
         <span>
-          <strong>PillarPop</strong>
-          <small>Korean Four Pillars</small>
+          <strong>SajuPop - Korean Four Pillars</strong>
+          <small>Birth chart readings</small>
         </span>
       </a>
       <nav class="nav-links" aria-label="Sections">
@@ -34,7 +34,7 @@
           <div class="eyebrow">Birth data -> corrected chart -> beautiful reading</div>
           <h1 id="workspace-title">A Korean Saju reading that explains the chart while it reads you.</h1>
           <p>
-            PillarPop turns your birth date, time, and place into a corrected Four Pillars chart, then
+            SajuPop turns your birth date, time, and place into a corrected Four Pillars chart, then
             translates stems, branches, Ten Gods, symbolic stars, and timing cycles into warm English.
           </p>
           <div class="mode-switch" aria-label="Label mode">
@@ -56,21 +56,76 @@
           <div class="input-grid">
             <label>
               Date
-              <input type="date" value="2000-07-29" />
+              <input id="dateInput" type="date" value="2000-07-29" />
             </label>
             <label>
               Time
-              <input type="time" value="22:01" />
+              <input id="timeInput" type="time" value="22:01" />
             </label>
           </div>
-          <label>
-            Birthplace
-            <input type="text" value="Los Angeles, United States" />
-          </label>
+          <div class="input-grid">
+            <label>
+              Birth Country
+              <select id="countryInput">
+                <option>United States</option>
+                <option>South Korea</option>
+                <option>Japan</option>
+                <option>Canada</option>
+                <option>United Kingdom</option>
+                <option>France</option>
+                <option>Germany</option>
+                <option>Spain</option>
+                <option>Italy</option>
+                <option>Netherlands</option>
+                <option>Australia</option>
+                <option>China</option>
+                <option>Taiwan</option>
+                <option>Hong Kong</option>
+                <option>Singapore</option>
+                <option>Thailand</option>
+                <option>Philippines</option>
+                <option>Indonesia</option>
+                <option>India</option>
+                <option>United Arab Emirates</option>
+                <option>Mexico</option>
+                <option>Brazil</option>
+              </select>
+            </label>
+            <label>
+              Birth City
+              <input id="cityInput" type="text" list="cityList" value="Los Angeles" placeholder="Type any city" />
+            </label>
+          </div>
+          <datalist id="cityList">
+            <option value="Los Angeles"></option>
+            <option value="San Francisco"></option>
+            <option value="New York"></option>
+            <option value="Chicago"></option>
+            <option value="Seoul"></option>
+            <option value="Busan"></option>
+            <option value="Tokyo"></option>
+            <option value="Osaka"></option>
+            <option value="Toronto"></option>
+            <option value="Vancouver"></option>
+            <option value="London"></option>
+            <option value="Paris"></option>
+            <option value="Berlin"></option>
+            <option value="Madrid"></option>
+            <option value="Rome"></option>
+            <option value="Amsterdam"></option>
+            <option value="Sydney"></option>
+            <option value="Melbourne"></option>
+            <option value="Shanghai"></option>
+            <option value="Singapore"></option>
+            <option value="Bangkok"></option>
+            <option value="Manila"></option>
+            <option value="Dubai"></option>
+            <option value="Mumbai"></option>
+          </datalist>
           <div class="input-grid">
             <label>
               Calendar
-              <select>
+              <select id="calendarInput">
                 <option>Gregorian</option>
                 <option>Lunar</option>
                 <option>Unknown</option>
@@ -78,20 +133,27 @@
             </label>
             <label>
               Accuracy
-              <select>
+              <select id="accuracyInput">
                 <option>Exact time</option>
                 <option>Approximate</option>
                 <option>Unknown time</option>
               </select>
             </label>
           </div>
-          <div class="receipt">
-            <span>UTC offset detected</span>
-            <strong>-07:00</strong>
-            <span>Solar-time adjustment</span>
-            <strong>+7 min</strong>
+          <label>
+            Reading Tone
+            <select id="toneInput">
+              <option>Warm, trendy, and detailed</option>
+              <option>Soft and comforting</option>
+              <option>Direct but protective</option>
+              <option>Elegant and premium</option>
+            </select>
+          </label>
+          <div class="receipt simple">
+            <strong>Location correction included</strong>
+            <span>City and country are used quietly in the background so the hour pillar feels less generic.</span>
           </div>
-          <button class="primary-btn" type="button">Preview My Pillars</button>
+          <button class="primary-btn" id="generateReadingBtn" type="button">Generate My Reading</button>
         </form>
       </section>
 
@@ -162,6 +224,9 @@
             <img class="chart-art" src="assets/pillars-orbit.svg" alt="Glossy Four Pillars orbit chart" />
           </div>
           <div class="pillar-table" aria-label="Four Pillars sample table">
+            <div class="chart-meta" id="chartMeta">
+              Enter birth data to calculate the prototype Manse chart.
+            </div>
             <div class="pillar-row header">
               <span>Hour</span>
               <span>Day</span>
@@ -169,16 +234,16 @@
               <span>Year</span>
             </div>
             <div class="pillar-row stems">
-              <span><b>癸</b><small>Gui Water</small></span>
-              <span><b>戊</b><small>Wu Earth</small></span>
-              <span><b>癸</b><small>Stable Wealth</small></span>
-              <span><b>庚</b><small>Talent Star</small></span>
+              <span><b id="hourStem">癸</b><small id="hourStemLabel">Gui Water</small></span>
+              <span><b id="dayStem">戊</b><small id="dayStemLabel">Wu Earth</small></span>
+              <span><b id="monthStem">癸</b><small id="monthStemLabel">Stable Wealth</small></span>
+              <span><b id="yearStem">庚</b><small id="yearStemLabel">Talent Star</small></span>
             </div>
             <div class="pillar-row branches">
-              <span><b>亥</b><small>Pig</small></span>
-              <span><b>子</b><small>Rat</small></span>
-              <span><b>未</b><small>Goat</small></span>
-              <span><b>辰</b><small>Dragon</small></span>
+              <span><b id="hourBranch">亥</b><small id="hourBranchLabel">Pig</small></span>
+              <span><b id="dayBranch">子</b><small id="dayBranchLabel">Rat</small></span>
+              <span><b id="monthBranch">未</b><small id="monthBranchLabel">Goat</small></span>
+              <span><b id="yearBranch">辰</b><small id="yearBranchLabel">Dragon</small></span>
             </div>
             <div class="chart-tags">
               <button type="button" data-term="Day Master">Day Master</button>
@@ -190,6 +255,58 @@
             </div>
             <div class="term-pop" id="termPop">Tap a chart chip to see the plain-English meaning.</div>
           </div>
+        </div>
+      </section>
+
+      <section class="app-shell explainer-band" aria-labelledby="visual-title">
+        <div class="section-heading">
+          <p>Visual explanation layer</p>
+          <h2 id="visual-title">For people who have never seen a Manse chart before.</h2>
+        </div>
+        <div class="visual-grid">
+          <article class="visual-card pillar-stack">
+            <h3>Four Pillars</h3>
+            <div class="mini-pillar-board" aria-label="Four Pillars visual guide">
+              <span>Hour<br /><b>Private self</b></span>
+              <span>Day<br /><b>Identity</b></span>
+              <span>Month<br /><b>Social role</b></span>
+              <span>Year<br /><b>Roots</b></span>
+            </div>
+            <p>Each pillar has a sky sign and a ground sign. The reading starts from the Day Master, then checks how every other marker relates to it.</p>
+          </article>
+          <article class="visual-card element-orbit">
+            <h3>Five Elements</h3>
+            <div class="element-wheel" aria-label="Five Elements visual wheel">
+              <span class="wood">Wood</span>
+              <span class="fire">Fire</span>
+              <span class="earth">Earth</span>
+              <span class="metal">Metal</span>
+              <span class="water">Water</span>
+            </div>
+            <p>Elements are not just objects. They become moods, habits, career styles, relationship needs, and timing patterns.</p>
+          </article>
+          <article class="visual-card link-map">
+            <h3>Links Under The Chart</h3>
+            <div class="link-chips">
+              <span>Combination</span>
+              <span>Clash</span>
+              <span>Harm</span>
+              <span>Penalty</span>
+              <span>Ghost Gate</span>
+            </div>
+            <p>These small tags explain why a chart feels smooth, conflicted, restless, magnetic, or emotionally complicated.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="app-shell generated-band" id="generated" aria-labelledby="generated-title">
+        <div class="section-heading">
+          <p>Live interpretation</p>
+          <h2 id="generated-title">Generated reading appears here after the chart is calculated.</h2>
+        </div>
+        <div class="result-shell empty" id="generatedResult">
+          <strong>No generated reading yet.</strong>
+          <p>Use the birth setup panel above. The API will calculate a prototype Saju chart first, then send only the structured chart data to OpenAI for a two-pass empathy polish.</p>
         </div>
       </section>
 
@@ -328,4 +445,3 @@
     <script src="script.js"></script>
   </body>
 </html>
-
