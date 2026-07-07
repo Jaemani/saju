@@ -25,7 +25,7 @@
         <a href="#glossary">Glossary</a>
         <a href="#notes">Trust</a>
       </nav>
-      <button class="chrome-btn" type="button" data-scroll="#birth-form">Login to Start</button>
+      <button class="chrome-btn" type="button" data-auth-action="login" data-auth-label>Login</button>
     </header>
 
     <main id="top">
@@ -392,11 +392,12 @@
     <nav class="bottom-nav" aria-label="Mobile navigation">
       <a href="#top">Home</a>
       <a href="#birth-form">Add</a>
-      <a href="#readings">Shop</a>
-      <a href="#glossary">Learn</a>
-      <a href="#notes">Vault</a>
-    </nav>
+        <a href="#readings">Shop</a>
+        <a href="#glossary">Learn</a>
+        <a href="account.html">Account</a>
+      </nav>
 
-    <script src="script.js"></script>
+    <script type="module" src="auth.js"></script>
+    <script defer src="script.js"></script>
   </body>
 </html>

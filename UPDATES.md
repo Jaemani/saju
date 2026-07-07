@@ -11,6 +11,11 @@ Date: 2026-07-07
 - Added dedicated `reading.html` result page with loading animation, estimated time, elapsed time, and generation steps.
 - Added login-ready checkout gate on the result page.
 - Added button-based city suggestions so suggested cities remain readable and styleable.
+- Added Firebase Auth client for Google, Facebook, Apple, and email/password login.
+- Added Firestore member management model at `members/{uid}`.
+- Added account page for profile, credits, plan, and saved reading placeholders.
+- Added `/api/firebase-config` for Vercel-managed Firebase client config.
+- Added Firestore security rules for user-scoped member documents.
 
 ### Changed
 

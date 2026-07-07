@@ -6,11 +6,15 @@ SajuPop is an overseas version of a low-price Korean Saju reading service. It be
 
 - `index.html` - responsive home, birth setup, product cards, chart education, and glossary.
 - `reading.html` - dedicated generated reading room with loading progress, result page, and login-ready checkout gate.
+- `account.html` - Firebase-backed member management page for profile, credits, plan, and saved reading placeholders.
 - `styles.css` - Y2K x Gen Z visual system with glossy chrome, aqua, lime, pink, and compact product cards.
 - `script.js` - category filtering, glossary filtering, accordions, country/city birth input, chart snapshots, and API rendering.
 - `reading.js` - result-page generation, progress state, and generated report rendering.
+- `auth.js` - Firebase Auth client for Google, Facebook, Apple, and email/password login.
+- `api/firebase-config.js` - Vercel endpoint that exposes public Firebase web config from env vars.
 - `api/saju-engine.js` - library-backed Manse core using `lunar-javascript`, city timezone lookup, IANA timezone offsets, DST handling, and longitude correction.
 - `api/generate-reading.js` - Vercel serverless endpoint for chart calculation and OpenAI reading generation.
+- `firestore.rules` - user-scoped member document access rules.
 - `assets/pillars-orbit.svg` - reusable chart visual asset.
 - `docs/product-spec.md` - overseas product strategy, UX, monetization, and content logic.
 - `docs/benchmark-sajui.md` - benchmark notes from Saju-i and international adaptation rules.
@@ -30,6 +34,12 @@ The current implementation separates chart structure from prose:
 3. A second OpenAI pass rewrites the same JSON for empathy, encouragement, and polished Saju-i-style emotional tone.
 
 Set `OPENAI_MODEL` to override the default model. The default is `gpt-5-mini`.
+
+## Auth And Members
+
+SajuPop uses Firebase Authentication and Firestore for account management. The UI supports Google, Facebook, Apple, and email/password login. Checkout is intentionally login-gated, and member documents are stored at `members/{uid}`.
+
+Firebase setup details are in `docs/firebase-setup.md`.
 
 ## Positioning
 

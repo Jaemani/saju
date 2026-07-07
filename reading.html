@@ -21,7 +21,7 @@
         <a href="index.html#glossary">Glossary</a>
         <a href="index.html#notes">Trust</a>
       </nav>
-      <button class="chrome-btn" type="button">Login</button>
+      <button class="chrome-btn" type="button" data-auth-action="login" data-auth-label>Login</button>
     </header>
 
     <main class="app-shell reading-room">
@@ -73,14 +73,14 @@
           </div>
           <div class="login-gate">
             <span>Payment-ready flow</span>
-            <button type="button">Login to unlock checkout</button>
+            <button type="button" data-auth-action="login">Login to unlock checkout</button>
           </div>
         </div>
         <div class="result-shell" id="generatedResult"></div>
       </section>
     </main>
 
-    <script src="reading.js"></script>
+    <script type="module" src="auth.js"></script>
+    <script defer src="reading.js"></script>
   </body>
 </html>
-

@@ -1,0 +1,238 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {
+  AppleAuthProvider,
+  browserLocalPersistence,
+  createUserWithEmailAndPassword,
+  FacebookAuthProvider,
+  getAuth,
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+  setPersistence,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {
+  doc,
+  getDoc,
+  getFirestore,
+  serverTimestamp,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const state = {
+  configured: false,
+  auth: null,
+  db: null,
+  user: null,
+  member: null,
+  afterLogin: null
+};
+
+function authTemplate() {
+  return `
+    <div class="auth-modal hidden" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <div class="auth-backdrop" data-auth-action="close"></div>
+      <section class="auth-card">
+        <button class="auth-close" type="button" data-auth-action="close" aria-label="Close login">×</button>
+        <p class="eyebrow">Member login</p>
+        <h2 id="authTitle">Sign in to save charts and unlock checkout.</h2>
+        <p class="auth-note" id="authStatus">Choose a login method.</p>
+        <div class="provider-grid">
+          <button type="button" data-provider="google"><span class="provider-icon google"></span>Google</button>
+          <button type="button" data-provider="facebook"><span class="provider-icon facebook"></span>Facebook</button>
+          <button type="button" data-provider="apple"><span class="provider-icon apple"></span>Apple</button>
+        </div>
+        <div class="email-auth">
+          <label>Email<input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com" /></label>
+          <label>Password<input id="authPassword" type="password" autocomplete="current-password" placeholder="8+ characters" /></label>
+          <div class="email-actions">
+            <button type="button" data-email-action="signin">Sign in</button>
+            <button type="button" data-email-action="signup">Create account</button>
+            <button type="button" data-email-action="reset">Reset password</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  `;
+}
+
+function qs(selector) {
+  return document.querySelector(selector);
+}
+
+function qsa(selector) {
+  return [...document.querySelectorAll(selector)];
+}
+
+function setStatus(message, isError = false) {
+  const node = qs("#authStatus");
+  if (!node) return;
+  node.textContent = message;
+  node.classList.toggle("error", isError);
+}
+
+function openAuth(options = {}) {
+  state.afterLogin = options.afterLogin || null;
+  qs("#authModal")?.classList.remove("hidden");
+  setStatus(state.configured ? "Choose a login method." : "Firebase is not configured yet.", !state.configured);
+}
+
+function closeAuth() {
+  qs("#authModal")?.classList.add("hidden");
+}
+
+function providerFor(name) {
+  if (name === "google") return new GoogleAuthProvider();
+  if (name === "facebook") return new FacebookAuthProvider();
+  if (name === "apple") return new AppleAuthProvider();
+  throw new Error("Unsupported provider");
+}
+
+async function upsertMember(user) {
+  if (!state.db || !user) return null;
+  const ref = doc(state.db, "members", user.uid);
+  const existing = await getDoc(ref);
+  const providers = user.providerData.map((provider) => provider.providerId);
+  const payload = {
+    uid: user.uid,
+    email: user.email || null,
+    displayName: user.displayName || null,
+    photoURL: user.photoURL || null,
+    providers,
+    lastLoginAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  };
+  if (!existing.exists()) {
+    payload.createdAt = serverTimestamp();
+    payload.plan = "free";
+    payload.starCredits = 0;
+    payload.moonCredits = 0;
+    payload.savedReadings = 0;
+  }
+  await setDoc(ref, payload, { merge: true });
+  const updated = await getDoc(ref);
+  state.member = updated.data();
+  return state.member;
+}
+
+function userLabel(user) {
+  if (!user) return "Login";
+  return user.displayName || user.email || "Account";
+}
+
+function updateAuthUI(user) {
+  qsa("[data-auth-label]").forEach((node) => {
+    node.textContent = userLabel(user);
+  });
+  qsa("[data-auth-action='login']").forEach((button) => {
+    button.textContent = user ? "Account" : "Login";
+  });
+  qsa("[data-member-only]").forEach((node) => {
+    node.classList.toggle("hidden", !user);
+  });
+  qsa("[data-guest-only]").forEach((node) => {
+    node.classList.toggle("hidden", !!user);
+  });
+}
+
+async function signInProvider(name) {
+  if (!state.auth) throw new Error("Firebase is not configured yet.");
+  setStatus(`Opening ${name} login...`);
+  const result = await signInWithPopup(state.auth, providerFor(name));
+  await upsertMember(result.user);
+  closeAuth();
+  if (state.afterLogin) state.afterLogin(result.user);
+  return result.user;
+}
+
+async function emailAction(action) {
+  if (!state.auth) throw new Error("Firebase is not configured yet.");
+  const email = qs("#authEmail")?.value.trim();
+  const password = qs("#authPassword")?.value;
+  if (!email) throw new Error("Enter your email first.");
+  if (action !== "reset" && !password) throw new Error("Enter your password.");
+  if (action === "reset") {
+    await sendPasswordResetEmail(state.auth, email);
+    setStatus("Password reset email sent.");
+    return null;
+  }
+  const result =
+    action === "signup"
+      ? await createUserWithEmailAndPassword(state.auth, email, password)
+      : await signInWithEmailAndPassword(state.auth, email, password);
+  await upsertMember(result.user);
+  closeAuth();
+  if (state.afterLogin) state.afterLogin(result.user);
+  return result.user;
+}
+
+async function initFirebase() {
+  const response = await fetch("/api/firebase-config");
+  const payload = await response.json();
+  if (!payload.configured) {
+    state.configured = false;
+    updateAuthUI(null);
+    return;
+  }
+  const app = initializeApp(payload.config);
+  state.auth = getAuth(app);
+  state.db = getFirestore(app);
+  state.configured = true;
+  await setPersistence(state.auth, browserLocalPersistence);
+  onAuthStateChanged(state.auth, async (user) => {
+    state.user = user;
+    if (user) await upsertMember(user);
+    updateAuthUI(user);
+    window.dispatchEvent(new CustomEvent("sajupop-auth-changed", { detail: { user, member: state.member } }));
+  });
+}
+
+function bindAuthUI() {
+  if (!qs("#authModal")) document.body.insertAdjacentHTML("beforeend", authTemplate());
+  document.addEventListener("click", async (event) => {
+    const authAction = event.target.closest("[data-auth-action]");
+    if (authAction) {
+      const action = authAction.dataset.authAction;
+      if (action === "login") {
+        if (state.user) window.location.href = "account.html";
+        else openAuth();
+      }
+      if (action === "logout" && state.auth) await signOut(state.auth);
+      if (action === "close") closeAuth();
+    }
+
+    const provider = event.target.closest("[data-provider]");
+    if (provider) {
+      try {
+        await signInProvider(provider.dataset.provider);
+      } catch (error) {
+        setStatus(error.message, true);
+      }
+    }
+
+    const emailButton = event.target.closest("[data-email-action]");
+    if (emailButton) {
+      try {
+        await emailAction(emailButton.dataset.emailAction);
+      } catch (error) {
+        setStatus(error.message, true);
+      }
+    }
+  });
+}
+
+window.SajuPopAuth = {
+  openAuth,
+  closeAuth,
+  getCurrentUser: () => state.user,
+  getMember: () => state.member,
+  isConfigured: () => state.configured,
+  signOut: () => signOut(state.auth)
+};
+
+bindAuthUI();
+initFirebase().finally(() => {
+  window.dispatchEvent(new CustomEvent("sajupop-auth-ready", { detail: { configured: state.configured } }));
+});

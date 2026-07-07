@@ -1,9 +1,10 @@
 {
   "name": "saju-pop",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "scripts": {
     "dev": "vercel dev",
+    "firebase:rules": "firebase deploy --only firestore:rules",
     "smoke:reading": "node scripts/smoke-reading.mjs"
   },
   "dependencies": {

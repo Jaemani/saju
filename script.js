@@ -76,8 +76,20 @@ function updateCitySuggestions() {
 
 function startReading() {
   const payload = collectBirthPayload();
-  sessionStorage.setItem("sajupop.pendingReading", JSON.stringify(payload));
-  window.location.href = "reading.html";
+  const goReading = () => {
+    sessionStorage.setItem("sajupop.pendingReading", JSON.stringify(payload));
+    window.location.href = "reading.html";
+  };
+  const auth = window.SajuPopAuth;
+  if (auth?.getCurrentUser?.()) {
+    goReading();
+    return;
+  }
+  if (auth?.openAuth) {
+    auth.openAuth({ afterLogin: goReading });
+    return;
+  }
+  goReading();
 }
 
 qsa("[data-scroll]").forEach((button) => {
@@ -151,4 +163,3 @@ qs("#birth-form")?.addEventListener("submit", (event) => {
 });
 
 updateCitySuggestions();
-
