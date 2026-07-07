@@ -73,6 +73,24 @@ function setStatus(message, isError = false) {
   node.classList.toggle("error", isError);
 }
 
+function friendlyAuthError(error) {
+  const code = error?.code || "";
+  const message = error?.message || String(error || "");
+  if (code.includes("configuration-not-found") || message.includes("CONFIGURATION_NOT_FOUND")) {
+    return "Firebase Auth is connected, but Authentication is not enabled in the Firebase console yet. Open Firebase Authentication, click Get started, then enable Email/Google providers.";
+  }
+  if (code.includes("operation-not-allowed")) {
+    return "This sign-in provider is not enabled yet in Firebase Authentication.";
+  }
+  if (code.includes("popup-blocked")) {
+    return "The login popup was blocked. Allow popups for this site and try again.";
+  }
+  if (code.includes("unauthorized-domain")) {
+    return "This domain is not authorized in Firebase Authentication settings.";
+  }
+  return message;
+}
+
 function openAuth(options = {}) {
   state.afterLogin = options.afterLogin || null;
   qs("#authModal")?.classList.remove("hidden");
@@ -92,29 +110,41 @@ function providerFor(name) {
 
 async function upsertMember(user) {
   if (!state.db || !user) return null;
-  const ref = doc(state.db, "members", user.uid);
-  const existing = await getDoc(ref);
-  const providers = user.providerData.map((provider) => provider.providerId);
-  const payload = {
-    uid: user.uid,
-    email: user.email || null,
-    displayName: user.displayName || null,
-    photoURL: user.photoURL || null,
-    providers,
-    lastLoginAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
-  };
-  if (!existing.exists()) {
-    payload.createdAt = serverTimestamp();
-    payload.plan = "free";
-    payload.starCredits = 0;
-    payload.moonCredits = 0;
-    payload.savedReadings = 0;
+  try {
+    const ref = doc(state.db, "members", user.uid);
+    const existing = await getDoc(ref);
+    const providers = user.providerData.map((provider) => provider.providerId);
+    const payload = {
+      uid: user.uid,
+      email: user.email || null,
+      displayName: user.displayName || null,
+      photoURL: user.photoURL || null,
+      providers,
+      lastLoginAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    };
+    if (!existing.exists()) {
+      payload.createdAt = serverTimestamp();
+      payload.plan = "free";
+      payload.starCredits = 0;
+      payload.moonCredits = 0;
+      payload.savedReadings = 0;
+    }
+    await setDoc(ref, payload, { merge: true });
+    const updated = await getDoc(ref);
+    state.member = updated.data();
+    return state.member;
+  } catch (error) {
+    console.warn("Member profile sync skipped:", error.message);
+    state.member = {
+      plan: "free",
+      starCredits: 0,
+      moonCredits: 0,
+      savedReadings: 0,
+      syncError: error.message
+    };
+    return state.member;
   }
-  await setDoc(ref, payload, { merge: true });
-  const updated = await getDoc(ref);
-  state.member = updated.data();
-  return state.member;
 }
 
 function userLabel(user) {
@@ -208,7 +238,7 @@ function bindAuthUI() {
       try {
         await signInProvider(provider.dataset.provider);
       } catch (error) {
-        setStatus(error.message, true);
+        setStatus(friendlyAuthError(error), true);
       }
     }
 
@@ -217,7 +247,7 @@ function bindAuthUI() {
       try {
         await emailAction(emailButton.dataset.emailAction);
       } catch (error) {
-        setStatus(error.message, true);
+        setStatus(friendlyAuthError(error), true);
       }
     }
   });

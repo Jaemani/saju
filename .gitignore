@@ -5,5 +5,7 @@ dist/
 build/
 .env
 .env.*
+*service-account*.json
+sajupop-*.json
 *.log
 .vercel
