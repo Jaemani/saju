@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Your SajuPop Reading</title>
+    <meta name="description" content="Generated Korean Four Pillars reading result page." />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="reading-page">
+    <header class="app-shell topbar" aria-label="Reading navigation">
+      <a class="brand" href="index.html" aria-label="SajuPop home">
+        <span class="brand-mark">四</span>
+        <span>
+          <strong>SajuPop - Korean Four Pillars</strong>
+          <small>Reading room</small>
+        </span>
+      </a>
+      <nav class="nav-links" aria-label="Reading links">
+        <a href="index.html#birth-form">New Chart</a>
+        <a href="index.html#glossary">Glossary</a>
+        <a href="index.html#notes">Trust</a>
+      </nav>
+      <button class="chrome-btn" type="button">Login</button>
+    </header>
+
+    <main class="app-shell reading-room">
+      <section class="loading-stage" id="loadingView" aria-live="polite">
+        <div class="loading-orb" aria-hidden="true">
+          <span class="ring ring-one"></span>
+          <span class="ring ring-two"></span>
+          <span class="ring ring-three"></span>
+          <b>四</b>
+        </div>
+        <div class="loading-copy">
+          <p class="eyebrow">Generating your reading</p>
+          <h1 id="loadingTitle">Reading the chart without rushing the voice.</h1>
+          <p>
+            SajuPop calculates the Manse chart first, then drafts the reading and runs a second empathy polish
+            so the result feels specific, warm, and human.
+          </p>
+          <div class="time-estimate">
+            <span>Estimated time</span>
+            <strong>45-90 sec</strong>
+            <span>Elapsed</span>
+            <strong><span id="elapsedSeconds">0</span> sec</strong>
+          </div>
+          <div class="progress-track" aria-label="Generation progress">
+            <i id="loadingProgress"></i>
+          </div>
+          <ol class="loading-steps">
+            <li class="active" data-step="0">Locate city and timezone</li>
+            <li data-step="1">Build Four Pillars</li>
+            <li data-step="2">Read elements and chart links</li>
+            <li data-step="3">Draft the interpretation</li>
+            <li data-step="4">Polish for empathy</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="empty-reading hidden" id="emptyView">
+        <p class="eyebrow">No birth data</p>
+        <h1>Start from the birth setup page.</h1>
+        <p>The reading room needs birth data before it can calculate a chart.</p>
+        <a class="primary-link" href="index.html#birth-form">Go to Birth Setup</a>
+      </section>
+
+      <section class="generated-band result-page-band hidden" id="resultView" aria-labelledby="resultTitle">
+        <div class="result-topline">
+          <div>
+            <p class="eyebrow">Your generated reading</p>
+            <h1 id="resultTitle">Your SajuPop result is ready.</h1>
+          </div>
+          <div class="login-gate">
+            <span>Payment-ready flow</span>
+            <button type="button">Login to unlock checkout</button>
+          </div>
+        </div>
+        <div class="result-shell" id="generatedResult"></div>
+      </section>
+    </main>
+
+    <script src="reading.js"></script>
+  </body>
+</html>
+

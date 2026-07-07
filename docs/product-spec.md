@@ -59,10 +59,12 @@ Critical calculation requirement:
 - Keep UTC and minute-level correction hidden from the default consumer UI.
 - Show a simplified `location correction included` message, with detailed correction available only in a technical/debug layer.
 
-Current prototype note:
+Current v0.3 implementation note:
 
-- The v0.2 engine uses a built-in country/city profile table plus country fallback values.
-- A production version should replace this with a verified timezone, DST, solar-term, and Manse calendar engine.
+- The Manse core uses `lunar-javascript` for Four Pillars and solar-term-backed chart data.
+- City and country are resolved with `city-timezones` and `countries-and-timezones`.
+- IANA timezone, DST offset, and longitude correction are applied before chart generation.
+- For cities that cannot be resolved, the app falls back to country-level timezone data and flags the location confidence internally.
 
 ## Main Screen Structure
 
@@ -103,7 +105,7 @@ The writing engine should separate objective markers from prose:
 
 ## UI Modes
 
-The prototype uses three label modes:
+The app uses three label modes:
 
 - `Simple` - plain-English labels only.
 - `Technical` - Korean/Chinese concepts with English translation.

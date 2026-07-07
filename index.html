@@ -6,7 +6,7 @@
     <title>SajuPop - Korean Four Pillars</title>
     <meta
       name="description"
-      content="International Saju prototype for Korean Four Pillars readings with glossary, chart preview, and Y2K x Gen Z UI."
+      content="International Saju app for Korean Four Pillars readings with glossary, chart preview, and Y2K x Gen Z UI."
     />
     <link rel="stylesheet" href="styles.css" />
   </head>
@@ -25,7 +25,7 @@
         <a href="#glossary">Glossary</a>
         <a href="#notes">Trust</a>
       </nav>
-      <button class="chrome-btn" type="button" data-scroll="#birth-form">Start $0.99</button>
+      <button class="chrome-btn" type="button" data-scroll="#birth-form">Login to Start</button>
     </header>
 
     <main id="top">
@@ -93,35 +93,10 @@
             </label>
             <label>
               Birth City
-              <input id="cityInput" type="text" list="cityList" value="Los Angeles" placeholder="Type any city" />
+              <input id="cityInput" type="text" value="Los Angeles" placeholder="Type any city" />
             </label>
           </div>
-          <datalist id="cityList">
-            <option value="Los Angeles"></option>
-            <option value="San Francisco"></option>
-            <option value="New York"></option>
-            <option value="Chicago"></option>
-            <option value="Seoul"></option>
-            <option value="Busan"></option>
-            <option value="Tokyo"></option>
-            <option value="Osaka"></option>
-            <option value="Toronto"></option>
-            <option value="Vancouver"></option>
-            <option value="London"></option>
-            <option value="Paris"></option>
-            <option value="Berlin"></option>
-            <option value="Madrid"></option>
-            <option value="Rome"></option>
-            <option value="Amsterdam"></option>
-            <option value="Sydney"></option>
-            <option value="Melbourne"></option>
-            <option value="Shanghai"></option>
-            <option value="Singapore"></option>
-            <option value="Bangkok"></option>
-            <option value="Manila"></option>
-            <option value="Dubai"></option>
-            <option value="Mumbai"></option>
-          </datalist>
+          <div class="city-suggestions" id="citySuggestions" aria-label="Suggested birth cities"></div>
           <div class="input-grid">
             <label>
               Calendar
@@ -140,20 +115,11 @@
               </select>
             </label>
           </div>
-          <label>
-            Reading Tone
-            <select id="toneInput">
-              <option>Warm, trendy, and detailed</option>
-              <option>Soft and comforting</option>
-              <option>Direct but protective</option>
-              <option>Elegant and premium</option>
-            </select>
-          </label>
           <div class="receipt simple">
             <strong>Location correction included</strong>
             <span>City and country are used quietly in the background so the hour pillar feels less generic.</span>
           </div>
-          <button class="primary-btn" id="generateReadingBtn" type="button">Generate My Reading</button>
+          <button class="primary-btn" id="generateReadingBtn" type="button">Continue to Reading</button>
         </form>
       </section>
 
@@ -174,42 +140,42 @@
             <h3>$0.99 Birth Chart</h3>
             <p>Your personality, money, work, love, family, location, and lucky actions.</p>
             <span>1 Star Credit</span>
-            <button type="button">See Reading</button>
+            <button type="button">Login to Unlock</button>
           </article>
           <article class="product-card" data-category="saju">
             <div class="badge muted">DUO</div>
             <h3>Compatibility Remix</h3>
             <p>For partners, friends, founders, roommates, and situationships.</p>
             <span>1 Star Credit</span>
-            <button type="button">Compare Charts</button>
+            <button type="button">Login to Compare</button>
           </article>
           <article class="product-card" data-category="timing">
             <div class="badge muted">ROADMAP</div>
             <h3>10-Year Luck Cycle</h3>
             <p>Decade-scale timing: when to push, pause, move, build, or reset.</p>
             <span>Partly Free</span>
-            <button type="button">Open Cycle</button>
+            <button type="button">Login to Open</button>
           </article>
           <article class="product-card" data-category="timing">
             <div class="badge muted">DATE</div>
             <h3>Lucky Date Picker</h3>
             <p>Choose dates for launches, moves, weddings, contracts, and openings.</p>
             <span>Partly Free</span>
-            <button type="button">Pick A Date</button>
+            <button type="button">Login to Pick</button>
           </article>
           <article class="product-card" data-category="timing">
             <div class="badge muted">YEAR</div>
             <h3>Year Ahead</h3>
             <p>Annual theme, monthly rhythm, pressure points, and lucky windows.</p>
             <span>Partly Free</span>
-            <button type="button">View Year</button>
+            <button type="button">Login to View</button>
           </article>
           <article class="product-card" data-category="chat">
             <div class="badge muted">ASK</div>
             <h3>Ask The Reader</h3>
             <p>Ask follow-up questions in plain English after your report.</p>
             <span>1 Moon Credit</span>
-            <button type="button">Start Chat</button>
+            <button type="button">Login to Ask</button>
           </article>
         </div>
       </section>
@@ -225,7 +191,7 @@
           </div>
           <div class="pillar-table" aria-label="Four Pillars sample table">
             <div class="chart-meta" id="chartMeta">
-              Enter birth data to calculate the prototype Manse chart.
+              Enter birth data to calculate your Manse chart.
             </div>
             <div class="pillar-row header">
               <span>Hour</span>
@@ -234,24 +200,24 @@
               <span>Year</span>
             </div>
             <div class="pillar-row stems">
-              <span><b id="hourStem">癸</b><small id="hourStemLabel">Gui Water</small></span>
-              <span><b id="dayStem">戊</b><small id="dayStemLabel">Wu Earth</small></span>
-              <span><b id="monthStem">癸</b><small id="monthStemLabel">Stable Wealth</small></span>
-              <span><b id="yearStem">庚</b><small id="yearStemLabel">Talent Star</small></span>
+              <span class="pillar-cell water"><i class="cell-icon sky"></i><b id="hourStem">癸</b><small id="hourStemLabel">Gui Water</small></span>
+              <span class="pillar-cell earth"><i class="cell-icon center"></i><b id="dayStem">戊</b><small id="dayStemLabel">Wu Earth</small></span>
+              <span class="pillar-cell water"><i class="cell-icon sky"></i><b id="monthStem">癸</b><small id="monthStemLabel">Stable Wealth</small></span>
+              <span class="pillar-cell metal"><i class="cell-icon sky"></i><b id="yearStem">庚</b><small id="yearStemLabel">Talent Star</small></span>
             </div>
             <div class="pillar-row branches">
-              <span><b id="hourBranch">亥</b><small id="hourBranchLabel">Pig</small></span>
-              <span><b id="dayBranch">子</b><small id="dayBranchLabel">Rat</small></span>
-              <span><b id="monthBranch">未</b><small id="monthBranchLabel">Goat</small></span>
-              <span><b id="yearBranch">辰</b><small id="yearBranchLabel">Dragon</small></span>
+              <span class="pillar-cell water"><i class="cell-icon ground"></i><b id="hourBranch">亥</b><small id="hourBranchLabel">Pig</small></span>
+              <span class="pillar-cell water"><i class="cell-icon ground"></i><b id="dayBranch">子</b><small id="dayBranchLabel">Rat</small></span>
+              <span class="pillar-cell earth"><i class="cell-icon ground"></i><b id="monthBranch">未</b><small id="monthBranchLabel">Goat</small></span>
+              <span class="pillar-cell earth"><i class="cell-icon ground"></i><b id="yearBranch">辰</b><small id="yearBranchLabel">Dragon</small></span>
             </div>
             <div class="chart-tags">
-              <button type="button" data-term="Day Master">Day Master</button>
-              <button type="button" data-term="Hidden Stems">Hidden Stems</button>
-              <button type="button" data-term="Ten Gods">Ten Gods</button>
-              <button type="button" data-term="Symbolic Stars">Symbolic Stars</button>
-              <button type="button" data-term="Zi-Wei Harm">Zi-Wei Harm</button>
-              <button type="button" data-term="Ghost Gate">Ghost Gate</button>
+              <button type="button" data-term="Day Master"><span class="tag-icon target"></span>Day Master</button>
+              <button type="button" data-term="Hidden Stems"><span class="tag-icon layers"></span>Hidden Stems</button>
+              <button type="button" data-term="Ten Gods"><span class="tag-icon orbit"></span>Ten Gods</button>
+              <button type="button" data-term="Symbolic Stars"><span class="tag-icon sparkle"></span>Symbolic Stars</button>
+              <button type="button" data-term="Zi-Wei Harm"><span class="tag-icon break"></span>Zi-Wei Harm</button>
+              <button type="button" data-term="Ghost Gate"><span class="tag-icon gate"></span>Ghost Gate</button>
             </div>
             <div class="term-pop" id="termPop">Tap a chart chip to see the plain-English meaning.</div>
           </div>
@@ -266,47 +232,36 @@
         <div class="visual-grid">
           <article class="visual-card pillar-stack">
             <h3>Four Pillars</h3>
-            <div class="mini-pillar-board" aria-label="Four Pillars visual guide">
-              <span>Hour<br /><b>Private self</b></span>
-              <span>Day<br /><b>Identity</b></span>
-              <span>Month<br /><b>Social role</b></span>
-              <span>Year<br /><b>Roots</b></span>
+            <div class="pillar-diagram" aria-label="Four Pillars visual guide">
+              <span class="pillar-tile hour"><i></i><b>Hour</b><small>Private self</small><em>inner room</em></span>
+              <span class="pillar-tile day"><i></i><b>Day</b><small>Identity</small><em>center</em></span>
+              <span class="pillar-tile month"><i></i><b>Month</b><small>Social role</small><em>season</em></span>
+              <span class="pillar-tile year"><i></i><b>Year</b><small>Roots</small><em>origin</em></span>
             </div>
             <p>Each pillar has a sky sign and a ground sign. The reading starts from the Day Master, then checks how every other marker relates to it.</p>
           </article>
           <article class="visual-card element-orbit">
             <h3>Five Elements</h3>
-            <div class="element-wheel" aria-label="Five Elements visual wheel">
-              <span class="wood">Wood</span>
-              <span class="fire">Fire</span>
-              <span class="earth">Earth</span>
-              <span class="metal">Metal</span>
-              <span class="water">Water</span>
+            <div class="element-lab" aria-label="Five Elements visual guide">
+              <span class="wood"><i></i><b>Wood</b><small>growth</small></span>
+              <span class="fire"><i></i><b>Fire</b><small>spark</small></span>
+              <span class="earth"><i></i><b>Earth</b><small>ground</small></span>
+              <span class="metal"><i></i><b>Metal</b><small>edge</small></span>
+              <span class="water"><i></i><b>Water</b><small>flow</small></span>
             </div>
             <p>Elements are not just objects. They become moods, habits, career styles, relationship needs, and timing patterns.</p>
           </article>
           <article class="visual-card link-map">
             <h3>Links Under The Chart</h3>
-            <div class="link-chips">
-              <span>Combination</span>
-              <span>Clash</span>
-              <span>Harm</span>
-              <span>Penalty</span>
-              <span>Ghost Gate</span>
+            <div class="relationship-map" aria-label="Branch relationship visual guide">
+              <span class="node combo">Combination</span>
+              <span class="node clash">Clash</span>
+              <span class="node harm">Harm</span>
+              <span class="node penalty">Penalty</span>
+              <span class="node gate">Ghost Gate</span>
             </div>
             <p>These small tags explain why a chart feels smooth, conflicted, restless, magnetic, or emotionally complicated.</p>
           </article>
-        </div>
-      </section>
-
-      <section class="app-shell generated-band" id="generated" aria-labelledby="generated-title">
-        <div class="section-heading">
-          <p>Live interpretation</p>
-          <h2 id="generated-title">Generated reading appears here after the chart is calculated.</h2>
-        </div>
-        <div class="result-shell empty" id="generatedResult">
-          <strong>No generated reading yet.</strong>
-          <p>Use the birth setup panel above. The API will calculate a prototype Saju chart first, then send only the structured chart data to OpenAI for a two-pass empathy polish.</p>
         </div>
       </section>
 

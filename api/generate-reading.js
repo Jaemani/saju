@@ -1,142 +1,4 @@
-const STEMS = [
-  { ko: "갑", hanja: "甲", pinyin: "Jia", label: "Yang Wood", element: "Wood", yinYang: "Yang" },
-  { ko: "을", hanja: "乙", pinyin: "Yi", label: "Yin Wood", element: "Wood", yinYang: "Yin" },
-  { ko: "병", hanja: "丙", pinyin: "Bing", label: "Yang Fire", element: "Fire", yinYang: "Yang" },
-  { ko: "정", hanja: "丁", pinyin: "Ding", label: "Yin Fire", element: "Fire", yinYang: "Yin" },
-  { ko: "무", hanja: "戊", pinyin: "Wu", label: "Yang Earth", element: "Earth", yinYang: "Yang" },
-  { ko: "기", hanja: "己", pinyin: "Ji", label: "Yin Earth", element: "Earth", yinYang: "Yin" },
-  { ko: "경", hanja: "庚", pinyin: "Geng", label: "Yang Metal", element: "Metal", yinYang: "Yang" },
-  { ko: "신", hanja: "辛", pinyin: "Xin", label: "Yin Metal", element: "Metal", yinYang: "Yin" },
-  { ko: "임", hanja: "壬", pinyin: "Ren", label: "Yang Water", element: "Water", yinYang: "Yang" },
-  { ko: "계", hanja: "癸", pinyin: "Gui", label: "Yin Water", element: "Water", yinYang: "Yin" }
-];
-
-const BRANCHES = [
-  { ko: "자", hanja: "子", pinyin: "Zi", animal: "Rat", element: "Water" },
-  { ko: "축", hanja: "丑", pinyin: "Chou", animal: "Ox", element: "Earth" },
-  { ko: "인", hanja: "寅", pinyin: "Yin", animal: "Tiger", element: "Wood" },
-  { ko: "묘", hanja: "卯", pinyin: "Mao", animal: "Rabbit", element: "Wood" },
-  { ko: "진", hanja: "辰", pinyin: "Chen", animal: "Dragon", element: "Earth" },
-  { ko: "사", hanja: "巳", pinyin: "Si", animal: "Snake", element: "Fire" },
-  { ko: "오", hanja: "午", pinyin: "Wu", animal: "Horse", element: "Fire" },
-  { ko: "미", hanja: "未", pinyin: "Wei", animal: "Goat", element: "Earth" },
-  { ko: "신", hanja: "申", pinyin: "Shen", animal: "Monkey", element: "Metal" },
-  { ko: "유", hanja: "酉", pinyin: "You", animal: "Rooster", element: "Metal" },
-  { ko: "술", hanja: "戌", pinyin: "Xu", animal: "Dog", element: "Earth" },
-  { ko: "해", hanja: "亥", pinyin: "Hai", animal: "Pig", element: "Water" }
-];
-
-const HIDDEN_STEMS = {
-  Zi: ["Gui"],
-  Chou: ["Ji", "Gui", "Xin"],
-  Yin: ["Jia", "Bing", "Wu"],
-  Mao: ["Yi"],
-  Chen: ["Wu", "Yi", "Gui"],
-  Si: ["Bing", "Wu", "Geng"],
-  Wu: ["Ding", "Ji"],
-  Wei: ["Ji", "Ding", "Yi"],
-  Shen: ["Geng", "Ren", "Wu"],
-  You: ["Xin"],
-  Xu: ["Wu", "Xin", "Ding"],
-  Hai: ["Ren", "Jia"]
-};
-
-const ELEMENT_FLOW = {
-  Wood: { produces: "Fire", controls: "Earth", producedBy: "Water", controlledBy: "Metal" },
-  Fire: { produces: "Earth", controls: "Metal", producedBy: "Wood", controlledBy: "Water" },
-  Earth: { produces: "Metal", controls: "Water", producedBy: "Fire", controlledBy: "Wood" },
-  Metal: { produces: "Water", controls: "Wood", producedBy: "Earth", controlledBy: "Fire" },
-  Water: { produces: "Wood", controls: "Fire", producedBy: "Metal", controlledBy: "Earth" }
-};
-
-const CITY_PROFILES = [
-  ["los angeles", "United States", -7, -118.2437],
-  ["san francisco", "United States", -7, -122.4194],
-  ["seattle", "United States", -7, -122.3321],
-  ["new york", "United States", -4, -74.006],
-  ["chicago", "United States", -5, -87.6298],
-  ["austin", "United States", -5, -97.7431],
-  ["miami", "United States", -4, -80.1918],
-  ["boston", "United States", -4, -71.0589],
-  ["toronto", "Canada", -4, -79.3832],
-  ["vancouver", "Canada", -7, -123.1207],
-  ["montreal", "Canada", -4, -73.5673],
-  ["calgary", "Canada", -6, -114.0719],
-  ["seoul", "South Korea", 9, 126.978],
-  ["busan", "South Korea", 9, 129.0756],
-  ["daegu", "South Korea", 9, 128.6014],
-  ["incheon", "South Korea", 9, 126.7052],
-  ["jeju", "South Korea", 9, 126.5312],
-  ["tokyo", "Japan", 9, 139.6503],
-  ["osaka", "Japan", 9, 135.5023],
-  ["kyoto", "Japan", 9, 135.7681],
-  ["fukuoka", "Japan", 9, 130.4017],
-  ["beijing", "China", 8, 116.4074],
-  ["shanghai", "China", 8, 121.4737],
-  ["guangzhou", "China", 8, 113.2644],
-  ["shenzhen", "China", 8, 114.0579],
-  ["hong kong", "Hong Kong", 8, 114.1694],
-  ["taipei", "Taiwan", 8, 121.5654],
-  ["singapore", "Singapore", 8, 103.8198],
-  ["bangkok", "Thailand", 7, 100.5018],
-  ["manila", "Philippines", 8, 120.9842],
-  ["cebu", "Philippines", 8, 123.8854],
-  ["jakarta", "Indonesia", 7, 106.8456],
-  ["bali", "Indonesia", 8, 115.1889],
-  ["sydney", "Australia", 10, 151.2093],
-  ["melbourne", "Australia", 10, 144.9631],
-  ["brisbane", "Australia", 10, 153.0251],
-  ["perth", "Australia", 8, 115.8575],
-  ["london", "United Kingdom", 1, -0.1276],
-  ["manchester", "United Kingdom", 1, -2.2426],
-  ["edinburgh", "United Kingdom", 1, -3.1883],
-  ["paris", "France", 2, 2.3522],
-  ["lyon", "France", 2, 4.8357],
-  ["marseille", "France", 2, 5.3698],
-  ["berlin", "Germany", 2, 13.405],
-  ["munich", "Germany", 2, 11.582],
-  ["hamburg", "Germany", 2, 9.9937],
-  ["madrid", "Spain", 2, -3.7038],
-  ["barcelona", "Spain", 2, 2.1734],
-  ["rome", "Italy", 2, 12.4964],
-  ["milan", "Italy", 2, 9.19],
-  ["amsterdam", "Netherlands", 2, 4.9041],
-  ["rotterdam", "Netherlands", 2, 4.4777],
-  ["dubai", "United Arab Emirates", 4, 55.2708],
-  ["abu dhabi", "United Arab Emirates", 4, 54.3773],
-  ["mumbai", "India", 5.5, 72.8777],
-  ["delhi", "India", 5.5, 77.1025],
-  ["bengaluru", "India", 5.5, 77.5946],
-  ["sao paulo", "Brazil", -3, -46.6333],
-  ["rio de janeiro", "Brazil", -3, -43.1729],
-  ["mexico city", "Mexico", -6, -99.1332],
-  ["guadalajara", "Mexico", -6, -103.3496]
-].map(([name, country, utcOffset, longitude]) => ({ name, country, utcOffset, longitude }));
-
-const COUNTRY_DEFAULTS = [
-  ["United States", -5, -95.7129],
-  ["South Korea", 9, 127.7669],
-  ["Japan", 9, 138.2529],
-  ["Canada", -5, -106.3468],
-  ["United Kingdom", 1, -3.436],
-  ["France", 2, 2.2137],
-  ["Germany", 2, 10.4515],
-  ["Spain", 2, -3.7492],
-  ["Italy", 2, 12.5674],
-  ["Netherlands", 2, 5.2913],
-  ["Australia", 10, 133.7751],
-  ["China", 8, 104.1954],
-  ["Taiwan", 8, 120.9605],
-  ["Hong Kong", 8, 114.1694],
-  ["Singapore", 8, 103.8198],
-  ["Thailand", 7, 100.9925],
-  ["Philippines", 8, 121.774],
-  ["Indonesia", 7, 113.9213],
-  ["India", 5.5, 78.9629],
-  ["United Arab Emirates", 4, 53.8478],
-  ["Mexico", -6, -102.5528],
-  ["Brazil", -3, -51.9253]
-].map(([country, utcOffset, longitude]) => ({ country, utcOffset, longitude }));
+const { calculateSaju } = require("./saju-engine");
 
 const RESPONSE_SCHEMA = {
   type: "object",
@@ -183,308 +45,11 @@ const VOICE_RULES = [
   "No deterministic fear language, no curses, no guaranteed outcomes, and no hard financial/medical/legal advice."
 ].join("\n");
 
-function stemByPinyin(pinyin) {
-  return STEMS.find((stem) => stem.pinyin === pinyin);
-}
-
-function sexagenary(index) {
-  const normalized = ((index % 60) + 60) % 60;
-  const stem = STEMS[normalized % 10];
-  const branch = BRANCHES[normalized % 12];
-  return { index: normalized, stem, branch, label: `${stem.pinyin}-${branch.pinyin}` };
-}
-
-function julianDayNumber(year, month, day) {
-  const a = Math.floor((14 - month) / 12);
-  const y = year + 4800 - a;
-  const m = month + 12 * a - 3;
-  return day + Math.floor((153 * m + 2) / 5) + 365 * y + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
-}
-
-function shiftDate({ year, month, day }, deltaDays) {
-  const date = new Date(Date.UTC(year, month - 1, day + deltaDays));
-  return { year: date.getUTCFullYear(), month: date.getUTCMonth() + 1, day: date.getUTCDate() };
-}
-
-function findCityProfile(place, country) {
-  const normalized = String(place || "").toLowerCase();
-  const countryName = String(country || "").toLowerCase();
-  const cityMatch = CITY_PROFILES.find((city) => normalized.includes(city.name));
-  if (cityMatch) return cityMatch;
-  const countryMatch = COUNTRY_DEFAULTS.find((item) => item.country.toLowerCase() === countryName || normalized.includes(item.country.toLowerCase()));
-  if (countryMatch) {
-    return {
-      name: place || countryMatch.country,
-      country: countryMatch.country,
-      utcOffset: countryMatch.utcOffset,
-      longitude: countryMatch.longitude
-    };
-  }
-  return {
-    name: place || "Unknown city",
-    country: country || "Unknown country",
-    utcOffset: 0,
-    longitude: 0
-  };
-}
-
-function solarTermMonth(date) {
-  const md = date.month * 100 + date.day;
-  if (md >= 1207) return { branchIndex: 0, offsetFromYin: 10, season: "deep winter Water" };
-  if (md >= 1107) return { branchIndex: 11, offsetFromYin: 9, season: "early winter Water" };
-  if (md >= 1008) return { branchIndex: 10, offsetFromYin: 8, season: "late autumn Earth" };
-  if (md >= 908) return { branchIndex: 9, offsetFromYin: 7, season: "autumn Metal" };
-  if (md >= 808) return { branchIndex: 8, offsetFromYin: 6, season: "early autumn Metal" };
-  if (md >= 707) return { branchIndex: 7, offsetFromYin: 5, season: "late summer Earth" };
-  if (md >= 606) return { branchIndex: 6, offsetFromYin: 4, season: "summer Fire" };
-  if (md >= 506) return { branchIndex: 5, offsetFromYin: 3, season: "early summer Fire" };
-  if (md >= 405) return { branchIndex: 4, offsetFromYin: 2, season: "late spring Earth" };
-  if (md >= 306) return { branchIndex: 3, offsetFromYin: 1, season: "spring Wood" };
-  if (md >= 204) return { branchIndex: 2, offsetFromYin: 0, season: "early spring Wood" };
-  if (md >= 106) return { branchIndex: 1, offsetFromYin: 11, season: "late winter Earth" };
-  return { branchIndex: 0, offsetFromYin: 10, season: "deep winter Water" };
-}
-
-function getYearPillar(date) {
-  const sajuYear = date.month * 100 + date.day < 204 ? date.year - 1 : date.year;
-  return { ...sexagenary(sajuYear - 4), sajuYear };
-}
-
-function getMonthPillar(date, yearStemIndex) {
-  const monthInfo = solarTermMonth(date);
-  const firstYinStem = [2, 4, 6, 8, 0][yearStemIndex % 5];
-  const stemIndex = (firstYinStem + monthInfo.offsetFromYin) % 10;
-  const branch = BRANCHES[monthInfo.branchIndex];
-  return {
-    index: null,
-    stem: STEMS[stemIndex],
-    branch,
-    label: `${STEMS[stemIndex].pinyin}-${branch.pinyin}`,
-    season: monthInfo.season
-  };
-}
-
-function getDayPillar(date) {
-  const jd = julianDayNumber(date.year, date.month, date.day);
-  return { ...sexagenary(jd + 11), julianDay: jd };
-}
-
-function getHourPillar(solarMinutes, dayStemIndex) {
-  const branchIndex = Math.floor((((solarMinutes + 60) % 1440) + 1440) % 1440 / 120) % 12;
-  const startStemIndex = [0, 2, 4, 6, 8][dayStemIndex % 5];
-  const stemIndex = (startStemIndex + branchIndex) % 10;
-  const branch = BRANCHES[branchIndex];
-  return {
-    index: null,
-    stem: STEMS[stemIndex],
-    branch,
-    label: `${STEMS[stemIndex].pinyin}-${branch.pinyin}`
-  };
-}
-
-function tenGod(dayStem, targetStem) {
-  const relation = ELEMENT_FLOW[dayStem.element];
-  const samePolarity = dayStem.yinYang === targetStem.yinYang;
-  if (targetStem.element === dayStem.element) return samePolarity ? "Peer Star" : "Rival Star";
-  if (targetStem.element === relation.produces) return samePolarity ? "Talent Star" : "Rebel Talent";
-  if (targetStem.element === relation.controls) return samePolarity ? "Dynamic Wealth" : "Stable Wealth";
-  if (targetStem.element === relation.controlledBy) return samePolarity ? "Pressure Star" : "Proper Authority";
-  if (targetStem.element === relation.producedBy) return samePolarity ? "Mystic Resource" : "Nurturing Resource";
-  return "Chart Relationship";
-}
-
-function countElements(pillars) {
-  const counts = { Wood: 0, Fire: 0, Earth: 0, Metal: 0, Water: 0 };
-  pillars.forEach((pillar) => {
-    counts[pillar.stem.element] += 1;
-    counts[pillar.branch.element] += 1;
-  });
-  return counts;
-}
-
-function relationTags(pillars) {
-  const stems = pillars.map((pillar) => pillar.stem.pinyin);
-  const branches = pillars.map((pillar) => pillar.branch.pinyin);
-  const tags = [];
-
-  const stemCombos = [
-    ["Jia", "Ji", "Heavenly Stem Combination to Earth"],
-    ["Yi", "Geng", "Heavenly Stem Combination to Metal"],
-    ["Bing", "Xin", "Heavenly Stem Combination to Water"],
-    ["Ding", "Ren", "Heavenly Stem Combination to Wood"],
-    ["Wu", "Gui", "Heavenly Stem Combination to Fire"]
-  ];
-  const branchCombos = [
-    ["Zi", "Chou", "Six Combination toward Earth"],
-    ["Yin", "Hai", "Six Combination toward Wood"],
-    ["Mao", "Xu", "Six Combination toward Fire"],
-    ["Chen", "You", "Six Combination toward Metal"],
-    ["Si", "Shen", "Six Combination toward Water"],
-    ["Wu", "Wei", "Six Combination toward Earth"]
-  ];
-  const clashes = [
-    ["Zi", "Wu", "Clash"],
-    ["Chou", "Wei", "Clash"],
-    ["Yin", "Shen", "Clash"],
-    ["Mao", "You", "Clash"],
-    ["Chen", "Xu", "Clash"],
-    ["Si", "Hai", "Clash"]
-  ];
-  const harms = [
-    ["Zi", "Wei", "Harm"],
-    ["Chou", "Wu", "Harm"],
-    ["Yin", "Si", "Harm"],
-    ["Mao", "Chen", "Harm"],
-    ["Shen", "Hai", "Harm"],
-    ["You", "Xu", "Harm"]
-  ];
-  const halfCombos = [
-    ["Yin", "Wu", "Half Fire Combination"],
-    ["Wu", "Xu", "Half Fire Combination"],
-    ["Hai", "Mao", "Half Wood Combination"],
-    ["Mao", "Wei", "Half Wood Combination"],
-    ["Shen", "Zi", "Half Water Combination"],
-    ["Zi", "Chen", "Half Water Combination"],
-    ["Si", "You", "Half Metal Combination"],
-    ["You", "Chou", "Half Metal Combination"]
-  ];
-
-  stemCombos.forEach(([a, b, label]) => {
-    if (stems.includes(a) && stems.includes(b)) tags.push(`${a}-${b}: ${label}`);
-  });
-  [...branchCombos, ...clashes, ...harms, ...halfCombos].forEach(([a, b, label]) => {
-    if (branches.includes(a) && branches.includes(b)) tags.push(`${a}-${b}: ${label}`);
-  });
-  if (["Yin", "Si", "Shen"].filter((branch) => branches.includes(branch)).length >= 2) {
-    tags.push("Yin-Si-Shen: Fire Penalty pattern");
-  }
-  if (["Chou", "Xu", "Wei"].filter((branch) => branches.includes(branch)).length >= 2) {
-    tags.push("Chou-Xu-Wei: Earth Penalty pattern");
-  }
-  if (branches.includes("Zi") && branches.includes("Mao")) {
-    tags.push("Zi-Mao: Courtesy Penalty pattern");
-  }
-  if ((branches.includes("Chen") && branches.includes("Hai")) || (branches.includes("Zi") && branches.includes("Wei"))) {
-    tags.push("Ghost Gate / Irritation marker");
-  }
-  return [...new Set(tags)];
-}
-
-function symbolicStars(pillars, dayStem) {
-  const branches = pillars.map((pillar) => pillar.branch.pinyin);
-  const dayBranch = pillars.find((pillar) => pillar.position === "Day").branch.pinyin;
-  const stars = [];
-  const nobleMap = {
-    Jia: ["Chou", "Wei"],
-    Wu: ["Chou", "Wei"],
-    Geng: ["Chou", "Wei"],
-    Yi: ["Zi", "Shen"],
-    Ji: ["Zi", "Shen"],
-    Bing: ["Hai", "You"],
-    Ding: ["Hai", "You"],
-    Ren: ["Si", "Mao"],
-    Gui: ["Si", "Mao"],
-    Xin: ["Yin", "Wu"]
-  };
-  const groupMap = [
-    { group: ["Shen", "Zi", "Chen"], charm: "You", travel: "Yin" },
-    { group: ["Yin", "Wu", "Xu"], charm: "Mao", travel: "Shen" },
-    { group: ["Si", "You", "Chou"], charm: "Wu", travel: "Hai" },
-    { group: ["Hai", "Mao", "Wei"], charm: "Zi", travel: "Si" }
-  ];
-  const group = groupMap.find((item) => item.group.includes(dayBranch));
-  if (group && branches.includes(group.charm)) stars.push("Red Charm Star / Peach Blossom accent");
-  if (group && branches.includes(group.travel)) stars.push("Travel Star / movement opens luck");
-  if ((nobleMap[dayStem.pinyin] || []).some((branch) => branches.includes(branch))) {
-    stars.push("Heavenly Noble / mentor support");
-  }
-  if (["Xin", "Geng"].includes(dayStem.pinyin) || branches.includes("You")) {
-    stars.push("Needle Star / precise words and technical detail");
-  }
-  if (["Chen", "Xu"].includes(dayBranch) || dayStem.pinyin === "Geng") {
-    stars.push("Iron Wall Star / strong backbone");
-  }
-  return [...new Set(stars)];
-}
-
-function calculateSaju(input) {
-  const [year, month, day] = String(input.date || "2000-07-29").split("-").map(Number);
-  const [hour, minute] = String(input.time || "22:01").split(":").map(Number);
-  const city = findCityProfile(input.birthplace, input.country);
-  const localMinutes = hour * 60 + minute;
-  const standardMeridian = city.utcOffset * 15;
-  const solarAdjustmentMinutes = Math.round((city.longitude - standardMeridian) * 4);
-  const adjustedMinutesRaw = localMinutes + solarAdjustmentMinutes;
-  const dayShift = Math.floor(adjustedMinutesRaw / 1440);
-  const solarMinutes = ((adjustedMinutesRaw % 1440) + 1440) % 1440;
-  const solarDate = shiftDate({ year, month, day }, dayShift);
-
-  const yearPillar = { position: "Year", ...getYearPillar(solarDate) };
-  const monthPillar = { position: "Month", ...getMonthPillar(solarDate, yearPillar.stem ? STEMS.indexOf(yearPillar.stem) : yearPillar.index % 10) };
-  const dayPillar = { position: "Day", ...getDayPillar(solarDate) };
-  const hourPillar = { position: "Hour", ...getHourPillar(solarMinutes, dayPillar.index % 10) };
-  const pillars = [hourPillar, dayPillar, monthPillar, yearPillar];
-  const dayMaster = dayPillar.stem;
-
-  const enrichedPillars = pillars.map((pillar) => ({
-    position: pillar.position,
-    stem: pillar.stem,
-    branch: pillar.branch,
-    tenGod: pillar.position === "Day" ? "Day Master" : tenGod(dayMaster, pillar.stem),
-    branchTenGod: tenGod(dayMaster, stemByPinyin(HIDDEN_STEMS[pillar.branch.pinyin][0])),
-    hiddenStems: HIDDEN_STEMS[pillar.branch.pinyin].map((pinyin) => {
-      const stem = stemByPinyin(pinyin);
-      return { ...stem, tenGod: tenGod(dayMaster, stem) };
-    }),
-    label: pillar.label,
-    season: pillar.season || null
-  }));
-
-  const elements = countElements(enrichedPillars);
-  const sortedElements = Object.entries(elements).sort((a, b) => b[1] - a[1]);
-  const strongest = sortedElements[0][0];
-  const weakest = sortedElements[sortedElements.length - 1][0];
-  const helpfulElements = [ELEMENT_FLOW[strongest].controls, ELEMENT_FLOW[weakest].producedBy].filter(Boolean);
-
-  return {
-    input: {
-      name: input.name || "Your",
-      date: input.date,
-      time: input.time,
-      birthplace: input.birthplace,
-      city: input.city || null,
-      country: input.country || null,
-      calendar: input.calendar || "Gregorian",
-      accuracy: input.accuracy || "Exact time",
-      tone: input.tone || "Warm, trendy, and detailed"
-    },
-    correction: {
-      city: city.name,
-      utcOffset: city.utcOffset,
-      longitude: city.longitude,
-      standardMeridian,
-      solarAdjustmentMinutes,
-      adjustedSolarTime: `${String(Math.floor(solarMinutes / 60)).padStart(2, "0")}:${String(solarMinutes % 60).padStart(2, "0")}`,
-      dayShift,
-      note: "Prototype correction uses a built-in city table and longitude-based solar-time adjustment. A production Manse engine should use verified timezone, DST, and solar-term tables."
-    },
-    dayMaster,
-    pillars: enrichedPillars,
-    elements,
-    strongestElement: strongest,
-    weakestElement: weakest,
-    helpfulElements: [...new Set(helpfulElements)],
-    relationshipTags: relationTags(enrichedPillars),
-    symbolicStars: symbolicStars(enrichedPillars, dayMaster),
-    calculationVersion: "prototype-saju-core-0.2"
-  };
-}
-
 function buildPrompt(chart) {
   return [
     "You are SajuPop, an English-language Korean Saju/Four Pillars reader.",
     "Write like the user's Korean Saju-i reference: detailed, affectionate, slightly trendy, emotionally specific, sometimes direct, but never cruel.",
-    "The objective chart data is already calculated. Do not invent pillars, birth data, or technical markers outside the provided JSON.",
+    "The objective chart data is already calculated by a library-backed Manse engine. Do not invent pillars, birth data, elements, Ten Gods, symbolic stars, or location correction data.",
     "Explain Korean Saju concepts for users who do not know Saju. Pair technical basis with plain English.",
     "Use the user's name naturally. If the name is missing, use 'you'.",
     "Tone rules: warm, polished, modern, vivid metaphors, practical advice, no generic horoscope filler.",
@@ -531,58 +96,58 @@ function fallbackReading(chart) {
   const dm = chart.dayMaster.label;
   const strong = chart.strongestElement;
   const weak = chart.weakestElement;
-  const tags = chart.relationshipTags.slice(0, 3).join(", ") || "a clean pillar structure";
+  const tags = chart.relationshipTags.slice(0, 3).join(", ") || "a calm chart structure";
   const stars = chart.symbolicStars.slice(0, 3).join(", ") || "quiet support markers";
   return {
-    headline: `${name}'s chart carries ${dm} energy under a strong ${strong} sky`,
-    summary: `This is a prototype fallback reading from the calculated chart. It uses the Four Pillars, element balance, Ten Gods, symbolic stars, and relationship tags before the OpenAI interpretation layer is available.`,
+    headline: `${name}'s ${dm} Day Master is shaped by strong ${strong} and quiet ${weak}`,
+    summary: "This fallback reading uses the library-backed Manse chart data without the OpenAI style layer.",
     sections: [
       {
         key: "core_metaphor",
-        title: `A ${dm} Day Master learning to balance ${strong} and ${weak}`,
-        body: `${name}, your Day Master is ${dm}, so the reading begins with your core operating style. The chart shows ${strong} as the loudest element and ${weak} as the quietest one, which creates the main tension of the report. Think of this as a weather map rather than a fixed destiny: the strongest element shows what comes naturally, while the missing element shows what your life keeps asking you to practice.`,
-        technicalBasis: `Day Master ${chart.dayMaster.pinyin}; element counts ${JSON.stringify(chart.elements)}.`
+        title: `A ${dm} center learning how to carry ${strong} with grace`,
+        body: `${name}, the chart begins with your Day Master, ${dm}. This is the anchor Saju uses before reading work, money, love, family, pressure, and support. Your strongest element is ${strong}, which shows what your system does almost automatically. Your quietest element is ${weak}, which points to the quality life keeps asking you to practice with more tenderness and intention.`,
+        technicalBasis: `Eight characters: ${chart.manse.eightCharacters}; Day Master ${chart.dayMaster.pinyin}; weighted elements ${JSON.stringify(chart.weightedElements)}.`
       },
       {
         key: "element_balance",
-        title: `The chart's loudest element is ${strong}`,
-        body: `When ${strong} dominates, your instincts can become very clear in that direction. The advantage is consistency and recognizable energy. The risk is overusing the same response even when life needs a different tool. Your helpful elements are ${chart.helpfulElements.join(" and ") || weak}, so the practical remedy is to build habits, people, places, and routines that bring those qualities into daily life.`,
-        technicalBasis: `Strongest element ${strong}; weakest element ${weak}; helpful element estimate ${chart.helpfulElements.join(", ")}.`
+        title: `${strong} is loud in the chart, so ${weak} needs deliberate space`,
+        body: `When ${strong} dominates, you may rely on that element even when another response would be softer or more strategic. This is not a flaw. It is a familiar muscle. The helpful path is to build routines, spaces, and relationships that bring in ${chart.helpfulElements.join(" and ") || weak}. That way your natural strength becomes usable instead of heavy.`,
+        technicalBasis: `Strongest element ${strong}; weakest element ${weak}; helpful estimate ${chart.helpfulElements.join(", ")}.`
       },
       {
         key: "day_master",
-        title: `Your Day Pillar is the center of the whole reading`,
-        body: `The Day Pillar is where Saju looks for identity, relationship style, and the emotional center of the chart. Your Day Master does not describe everything about you, but it becomes the reference point for Ten Gods such as wealth, talent, authority, peers, and resources. That is why the same branch can mean different things for different people.`,
+        title: "Your Day Pillar is the emotional center of the report",
+        body: `The Day Pillar shows how the chart reads identity and close relationships. The sky sign is visible style; the ground sign is the emotional floor underneath. Reading both together keeps the report from becoming a shallow personality label. This is why Saju can feel specific when the calculation is handled carefully.`,
         technicalBasis: `Day Pillar ${chart.pillars.find((pillar) => pillar.position === "Day").label}.`
       },
       {
         key: "reality_check",
-        title: "The reality check is to stop fighting your own pattern",
-        body: `The chart tags include ${tags}. These markers do not mean something bad must happen. They mean certain frictions repeat until they are handled consciously. If you notice the same relationship tension, money habit, or overthinking loop returning, treat it as a design problem. Build a better container instead of blaming your personality.`,
-        technicalBasis: `Relationship markers: ${chart.relationshipTags.join("; ") || "none detected in prototype layer"}.`
+        title: "The repeated friction is asking for a better container, not self-blame",
+        body: `The chart tags include ${tags}. These do not mean a fixed bad outcome. They show where pressure, attraction, interruption, or misunderstanding can repeat. The practical move is to design clearer boundaries around those themes before they become drama. You do not need to become a different person; you need a better operating system for your own sensitivity.`,
+        technicalBasis: `Relationship markers: ${chart.relationshipTags.join("; ") || "none detected"}.`
       },
       {
         key: "validation",
-        title: "You have already been carrying more than people can see",
-        body: `A good Saju reading should not only point out flaws. It should also name the strength that made you survive your own chart. The presence of ${stars} suggests that your sensitivity and timing are not random. They are part of how you read rooms, sense openings, and recover after pressure. The task is to use that perception with gentleness.`,
-        technicalBasis: `Symbolic stars: ${chart.symbolicStars.join("; ") || "none detected in prototype layer"}.`
+        title: "You have been carrying more quietly than people realize",
+        body: `The softer markers include ${stars}. At their best, they describe timing, perception, and the ability to notice what others miss. If you have felt tired from always reading the room, that makes sense. Your chart suggests that your sensitivity is not random noise; it is a real instrument. It simply needs rest, warmth, and people who do not punish you for having depth.`,
+        technicalBasis: `Symbolic stars: ${chart.symbolicStars.join("; ") || "none detected"}.`
       },
       {
         key: "personality",
-        title: "Your personality works best when it has both freedom and structure",
-        body: `You are not meant to be read as one flat trait. The pillars show visible energy, hidden stems, and branch dynamics, so your outside behavior and inside weather can feel different. Give yourself systems that let you move without losing shape: clear goals, flexible methods, and fewer people who demand instant emotional access.`,
-        technicalBasis: `Hidden stems across branches create the inner layer of the reading.`
+        title: "Your personality has a visible layer and a hidden layer",
+        body: "The visible stems describe how energy appears first. The hidden stems show what lives underneath. This is why you can look composed while carrying a very different private weather system inside. Your best growth comes from respecting both layers instead of forcing yourself to be simple for other people's comfort.",
+        technicalBasis: "Hidden stems are calculated inside each earthly branch."
       },
       {
         key: "career",
-        title: "Career luck improves when your technical edge becomes a signature",
-        body: `The chart supports work that turns observation into value. That can be analysis, product thinking, writing, design, advising, research, education, strategy, or any field where people pay for your refined judgment. Repetitive work with no authorship may drain you faster than it drains others, so build a visible skill stack.`,
-        technicalBasis: `Ten Gods and symbolic star mix: ${chart.pillars.map((pillar) => `${pillar.position} ${pillar.tenGod}`).join(", ")}.`
+        title: "Work improves when your pattern becomes a signature skill",
+        body: "The chart is strongest when observation turns into something useful: analysis, design, writing, advising, research, education, strategy, or technical craft. Repetitive work with no ownership may flatten you. A role that lets you refine judgment and produce a visible result will fit the chart better.",
+        technicalBasis: `Ten Gods across pillars: ${chart.pillars.map((pillar) => `${pillar.position} ${pillar.tenGod}`).join(", ")}.`
       },
       {
         key: "money",
-        title: "Money grows when emotion and systems stop sharing one wallet",
-        body: `Your money advice should be practical, not dramatic. Separate comfort spending, social spending, and future-building money. The more intense the chart feels, the more boring the money system should be. Autopay, buckets, written rules, and slow decisions protect you from moods pretending to be strategy.`,
+        title: "Money needs boring systems so your feelings do not have to manage everything",
+        body: "The safest money advice here is structure. Separate comfort spending, social spending, and future-building money. When the chart is emotionally responsive, a boring financial system is not restrictive; it is protective. It lets your life feel softer because the basics are already held.",
         technicalBasis: `Wealth-related Ten Gods are interpreted relative to ${chart.dayMaster.pinyin}.`
       }
     ],
@@ -608,48 +173,39 @@ function extractOutputText(data) {
 }
 
 async function requestStructuredReading(model, prompt, instructions) {
-    const response = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model,
-        instructions,
-        input: [
-          {
-            role: "user",
-            content: [{ type: "input_text", text: prompt }]
-          }
-        ],
-        max_output_tokens: 5200,
-        text: {
-          format: {
-            type: "json_schema",
-            name: "saju_pop_reading",
-            strict: true,
-            schema: RESPONSE_SCHEMA
-          }
+  const response = await fetch("https://api.openai.com/v1/responses", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      model,
+      instructions,
+      input: [{ role: "user", content: [{ type: "input_text", text: prompt }] }],
+      max_output_tokens: 5200,
+      text: {
+        format: {
+          type: "json_schema",
+          name: "saju_pop_reading",
+          strict: true,
+          schema: RESPONSE_SCHEMA
         }
-      })
-    });
-
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(data.error?.message || `OpenAI request failed with ${response.status}`);
-    }
-
-    const outputText = extractOutputText(data);
-    return JSON.parse(outputText);
+      }
+    })
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error?.message || `OpenAI request failed with ${response.status}`);
+  return JSON.parse(extractOutputText(data));
 }
 
 async function callOpenAI(chart) {
-  if (!process.env.OPENAI_API_KEY) return { reading: fallbackReading(chart), model: "fallback", source: "fallback", voicePasses: ["fallback"] };
+  if (!process.env.OPENAI_API_KEY) {
+    return { reading: fallbackReading(chart), model: "fallback", source: "fallback", voicePasses: ["fallback"] };
+  }
   const preferred = process.env.OPENAI_MODEL || "gpt-5-mini";
   const candidates = [...new Set([preferred, "gpt-5-mini", "gpt-5.1-mini", "gpt-4.1-mini"])];
   let lastError = null;
-
   for (const model of candidates) {
     try {
       const draft = await requestStructuredReading(
@@ -679,10 +235,9 @@ async function callOpenAI(chart) {
       throw error;
     }
   }
-
   const reading = fallbackReading(chart);
   reading.summary = `${reading.summary} OpenAI fallback reason: ${lastError || "unknown error"}.`;
-  return { reading, model: "fallback", source: "fallback", warning: lastError };
+  return { reading, model: "fallback", source: "fallback", warning: lastError, voicePasses: ["fallback"] };
 }
 
 async function handler(req, res) {
@@ -691,7 +246,6 @@ async function handler(req, res) {
     res.status(405).json({ ok: false, error: "Method not allowed" });
     return;
   }
-
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : req.body || {};
     const chart = calculateSaju(body);
@@ -705,3 +259,4 @@ async function handler(req, res) {
 module.exports = handler;
 module.exports.calculateSaju = calculateSaju;
 module.exports.fallbackReading = fallbackReading;
+

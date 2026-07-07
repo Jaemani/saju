@@ -5,5 +5,10 @@
   "scripts": {
     "dev": "vercel dev",
     "smoke:reading": "node scripts/smoke-reading.mjs"
+  },
+  "dependencies": {
+    "city-timezones": "^1.3.4",
+    "countries-and-timezones": "^3.9.0",
+    "lunar-javascript": "^1.7.7"
   }
 }

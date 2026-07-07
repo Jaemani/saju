@@ -1,5 +1,24 @@
 # Update Notes
 
+## v0.3.0 - Library-Backed Manse Core And Reading Room
+
+Date: 2026-07-07
+
+### Added
+
+- Added `lunar-javascript` for library-backed Four Pillars, solar terms, hidden stems, Ten Gods, life stages, Na Yin, and void branches.
+- Added `city-timezones` and `countries-and-timezones` for country/city disambiguation, IANA timezone lookup, DST-aware offset handling, and longitude correction.
+- Added dedicated `reading.html` result page with loading animation, estimated time, elapsed time, and generation steps.
+- Added login-ready checkout gate on the result page.
+- Added button-based city suggestions so suggested cities remain readable and styleable.
+
+### Changed
+
+- Removed the Reading Tone selector. The product now uses one opinionated SajuPop voice.
+- Split home/explanation and generated result into separate pages.
+- Replaced text-heavy guide cards with visual pillar tiles, element icons, relationship map nodes, and chart chip icons.
+- Replaced the internal prototype calculation layer with a library-backed Manse calculation module.
+
 ## v0.2.0 - Live Reading Engine And Visual Decoder
 
 Date: 2026-07-07
@@ -7,7 +26,7 @@ Date: 2026-07-07
 ### Added
 
 - Added Vercel serverless API route `api/generate-reading.js`.
-- Added prototype Saju chart calculation for pillars, element balance, hidden stems, Ten Gods, relationship tags, and symbolic stars.
+- Added Saju chart calculation for pillars, element balance, hidden stems, Ten Gods, relationship tags, and symbolic stars.
 - Connected OpenAI Responses API with default `gpt-5-mini`.
 - Added two-pass writing flow: chart-based draft, then empathy and encouragement polish.
 - Added country/city birth input with dynamic city suggestions and free-text city support.
@@ -19,10 +38,6 @@ Date: 2026-07-07
 - Renamed brand to `SajuPop - Korean Four Pillars`.
 - Simplified user-facing location correction copy. UTC offset and minute-level solar correction are no longer shown in the main form.
 - Updated generated result UI so unfamiliar Saju terms are supported by visual structure before long prose sections.
-
-### Notes
-
-- The current Saju calculation layer is a prototype. Production should replace the built-in city/country table and solar-term approximation with a verified Manse calendar engine.
 
 ## v0.1.0 - International Saju Baseline
 

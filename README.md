@@ -1,20 +1,23 @@
-# SajuPop International Saju Prototype
+# SajuPop International Saju App
 
 SajuPop is an overseas version of a low-price Korean Saju reading service. It benchmarks the Saju-i style of product packaging, but reframes the experience for English-speaking users who do not know Saju, BaZi, the Manse calendar, Ten Gods, Shinsal, branch relationships, or Korean fortune vocabulary.
 
 ## What Is Included
 
-- `index.html` - responsive app prototype for desktop and mobile.
+- `index.html` - responsive home, birth setup, product cards, chart education, and glossary.
+- `reading.html` - dedicated generated reading room with loading progress, result page, and login-ready checkout gate.
 - `styles.css` - Y2K x Gen Z visual system with glossy chrome, aqua, lime, pink, and compact product cards.
 - `script.js` - category filtering, glossary filtering, accordions, country/city birth input, chart snapshots, and API rendering.
-- `api/generate-reading.js` - Vercel serverless endpoint for prototype Saju calculation and OpenAI reading generation.
+- `reading.js` - result-page generation, progress state, and generated report rendering.
+- `api/saju-engine.js` - library-backed Manse core using `lunar-javascript`, city timezone lookup, IANA timezone offsets, DST handling, and longitude correction.
+- `api/generate-reading.js` - Vercel serverless endpoint for chart calculation and OpenAI reading generation.
 - `assets/pillars-orbit.svg` - reusable chart visual asset.
 - `docs/product-spec.md` - overseas product strategy, UX, monetization, and content logic.
 - `docs/benchmark-sajui.md` - benchmark notes from Saju-i and international adaptation rules.
 - `docs/saju-glossary-en.md` - English label system for Saju, Manse calendar, Ten Gods, stars, combinations, clashes, harms, and sample Korean terms.
 - `UPDATES.md` - version notes.
 
-## Open The Prototype
+## Open The App
 
 Open `index.html` directly for the static UI. To use live generated readings, deploy to Vercel or run `vercel dev` with `OPENAI_API_KEY` in `.env`.
 
@@ -22,7 +25,7 @@ Open `index.html` directly for the static UI. To use live generated readings, de
 
 The current implementation separates chart structure from prose:
 
-1. A prototype Saju core calculates year, month, day, and hour pillars, element balance, hidden stems, Ten Gods, symbolic stars, and relationship tags.
+1. The Manse core calculates year, month, day, and hour pillars, element balance, hidden stems, Ten Gods, symbolic stars, and relationship tags.
 2. The OpenAI Responses API generates a structured reading from the chart JSON.
 3. A second OpenAI pass rewrites the same JSON for empathy, encouragement, and polished Saju-i-style emotional tone.
 
