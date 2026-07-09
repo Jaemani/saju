@@ -1337,6 +1337,20 @@ h1 {
   line-height: 1.5;
 }
 
+.checkout-note button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  margin-top: 12px;
+  border: 1px solid rgba(16, 21, 37, 0.2);
+  border-radius: 8px;
+  padding: 0 14px;
+  background: var(--ink);
+  color: #fff;
+  font-weight: 900;
+}
+
 .auth-modal {
   position: fixed;
   inset: 0;
@@ -1985,6 +1999,212 @@ h1 {
 .bottom-nav a:hover {
   background: var(--ink);
   color: #fff;
+}
+
+.result-brief,
+.result-map {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.result-brief {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.brief-card,
+.map-node {
+  border: 1px solid rgba(16, 21, 37, 0.14);
+  border-radius: 8px;
+  padding: 13px;
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow: 0 10px 22px rgba(16, 21, 37, 0.08);
+}
+
+.brief-card span,
+.map-node span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  margin-bottom: 8px;
+  border-radius: 999px;
+  padding: 0 8px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.brief-card h4,
+.map-node strong {
+  display: block;
+  margin: 0 0 8px;
+  color: var(--ink);
+  line-height: 1.1;
+}
+
+.brief-card p,
+.map-node p {
+  margin: 0;
+  color: #42495b;
+  line-height: 1.48;
+}
+
+.brief-1 {
+  background: linear-gradient(135deg, rgba(125, 247, 255, 0.42), rgba(255, 255, 255, 0.78));
+}
+
+.brief-2 {
+  background: linear-gradient(135deg, rgba(255, 93, 184, 0.24), rgba(255, 255, 255, 0.78));
+}
+
+.brief-3 {
+  background: linear-gradient(135deg, rgba(223, 255, 86, 0.44), rgba(255, 255, 255, 0.78));
+}
+
+.result-map {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.map-node {
+  min-height: 132px;
+}
+
+.map-master {
+  background: linear-gradient(180deg, rgba(255, 106, 79, 0.34), rgba(255, 255, 255, 0.78));
+}
+
+.map-elements {
+  background: linear-gradient(180deg, rgba(91, 184, 255, 0.32), rgba(255, 255, 255, 0.78));
+}
+
+.map-help {
+  background: linear-gradient(180deg, rgba(126, 226, 142, 0.34), rgba(255, 255, 255, 0.78));
+}
+
+.map-link {
+  background: linear-gradient(180deg, rgba(229, 197, 104, 0.42), rgba(255, 255, 255, 0.78));
+}
+
+.generated-trigger small {
+  flex: 0 0 auto;
+  color: #697184;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.generated-trigger b {
+  flex: 1;
+}
+
+.generated-section.closed .generated-trigger {
+  background: rgba(255, 255, 255, 0.42);
+}
+
+.voice-meter small {
+  color: #394055;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.account-mini-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(16, 21, 37, 0.18);
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--aqua), var(--lime), var(--pink));
+  color: var(--ink);
+  font-weight: 900;
+}
+
+.login-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(125, 247, 255, 0.24), rgba(255, 93, 184, 0.16));
+}
+
+.account-preview-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.account-preview-card::after {
+  content: "";
+  position: absolute;
+  right: -28px;
+  bottom: -28px;
+  width: 86px;
+  height: 86px;
+  border: 1px solid rgba(16, 21, 37, 0.12);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.36);
+}
+
+.vault-preview {
+  background: linear-gradient(180deg, rgba(91, 184, 255, 0.25), rgba(255, 255, 255, 0.76));
+}
+
+.credit-preview {
+  background: linear-gradient(180deg, rgba(223, 255, 86, 0.34), rgba(255, 255, 255, 0.76));
+}
+
+.privacy-preview {
+  background: linear-gradient(180deg, rgba(255, 93, 184, 0.2), rgba(255, 255, 255, 0.76));
+}
+
+@media (max-width: 900px) {
+  .result-brief,
+  .result-map {
+    grid-template-columns: 1fr;
+  }
+
+  .generated-trigger {
+    min-height: 54px;
+    padding: 10px 12px;
+  }
+
+  .generated-body p {
+    font-size: 0.94rem;
+    line-height: 1.58;
+  }
+
+  .map-node {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .result-topline .login-gate {
+    display: none;
+  }
+
+  .generated-hero h3 {
+    font-size: clamp(1.55rem, 10vw, 2.25rem);
+  }
+
+  .result-brief,
+  .result-map,
+  .chart-snapshot,
+  .plain-decoder,
+  .tag-strip,
+  .generated-list {
+    margin-top: 12px;
+  }
+
+  .brief-card,
+  .map-node,
+  .generated-body,
+  .lucky-box,
+  .checkout-note {
+    padding: 12px;
+  }
+
+  .account-hero h1 {
+    font-size: clamp(2.25rem, 14vw, 4rem);
+  }
 }
 
 @media (max-width: 900px) {

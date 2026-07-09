@@ -1,5 +1,18 @@
 # Update Notes
 
+## v0.3.2 - Reading UX And Visual Hierarchy
+
+Date: 2026-07-09
+
+### Changed
+
+- Let users generate the first reading before login; login remains for saving and checkout.
+- Added quick-take result cards and a visual chart map above the long generated reading.
+- Collapsed later generated sections by default so mobile reading feels lighter.
+- Moved mobile checkout login CTA below the reading content instead of interrupting the top.
+- Reworked guest account page into a value preview for Vault, credits, and private profile.
+- Updated loading copy with more human progress states for longer generation times.
+
 ## v0.3.1 - Focused Login Providers
 
 Date: 2026-07-07

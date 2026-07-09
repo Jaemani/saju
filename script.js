@@ -76,20 +76,8 @@ function updateCitySuggestions() {
 
 function startReading() {
   const payload = collectBirthPayload();
-  const goReading = () => {
-    sessionStorage.setItem("sajupop.pendingReading", JSON.stringify(payload));
-    window.location.href = "reading.html";
-  };
-  const auth = window.SajuPopAuth;
-  if (auth?.getCurrentUser?.()) {
-    goReading();
-    return;
-  }
-  if (auth?.openAuth) {
-    auth.openAuth({ afterLogin: goReading });
-    return;
-  }
-  goReading();
+  sessionStorage.setItem("sajupop.pendingReading", JSON.stringify(payload));
+  window.location.href = "reading.html";
 }
 
 qsa("[data-scroll]").forEach((button) => {
