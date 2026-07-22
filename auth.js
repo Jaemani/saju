@@ -28,25 +28,29 @@ const state = {
   afterLogin: null
 };
 
+function t(key, variables) {
+  return window.SajuPopI18n?.t(key, variables) || key;
+}
+
 function authTemplate() {
   return `
     <div class="auth-modal hidden" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
       <div class="auth-backdrop" data-auth-action="close"></div>
       <section class="auth-card">
-        <button class="auth-close" type="button" data-auth-action="close" aria-label="Close login">×</button>
-        <p class="eyebrow">Member login</p>
-        <h2 id="authTitle">Sign in to save charts and unlock checkout.</h2>
-        <p class="auth-note" id="authStatus">Continue with Google or email.</p>
+        <button class="auth-close" type="button" data-auth-action="close" aria-label="${t("auth.close")}">×</button>
+        <p class="eyebrow" data-i18n="auth.eyebrow">Member login</p>
+        <h2 id="authTitle" data-i18n="auth.title">Sign in when you want to keep this reading.</h2>
+        <p class="auth-note" id="authStatus" data-i18n="auth.note">Continue with Google or email.</p>
         <div class="provider-grid">
-          <button type="button" data-provider="google"><span class="provider-icon google"></span>Continue with Google</button>
+          <button type="button" data-provider="google"><span class="provider-icon google"></span><span data-i18n="auth.google">Continue with Google</span></button>
         </div>
         <div class="email-auth">
-          <label>Email<input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com" /></label>
-          <label>Password<input id="authPassword" type="password" autocomplete="current-password" placeholder="8+ characters" /></label>
+          <label><span data-i18n="auth.email">Email</span><input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com" /></label>
+          <label><span data-i18n="auth.password">Password</span><input id="authPassword" type="password" autocomplete="current-password" placeholder="8+ characters" /></label>
           <div class="email-actions">
-            <button type="button" data-email-action="signin">Sign in</button>
-            <button type="button" data-email-action="signup">Create account</button>
-            <button type="button" data-email-action="reset">Reset password</button>
+            <button type="button" data-email-action="signin" data-i18n="auth.signIn">Sign in</button>
+            <button type="button" data-email-action="signup" data-i18n="auth.create">Create account</button>
+            <button type="button" data-email-action="reset" data-i18n="auth.reset">Reset password</button>
           </div>
         </div>
       </section>
@@ -73,22 +77,22 @@ function friendlyAuthError(error) {
   const code = error?.code || "";
   const message = error?.message || String(error || "");
   if (code.includes("configuration-not-found") || message.includes("CONFIGURATION_NOT_FOUND")) {
-    return "Firebase Auth is connected, but Authentication is not enabled in the Firebase console yet.";
+    return t("errors.config");
   }
   if (code.includes("operation-not-allowed")) {
-    return "This sign-in method is not enabled yet in Firebase Authentication.";
+    return t("errors.method");
   }
   if (code.includes("popup-blocked")) {
-    return "The login popup was blocked. Allow popups for this site and try again.";
+    return t("errors.popup");
   }
   if (code.includes("unauthorized-domain")) {
-    return "This domain is not authorized in Firebase Authentication settings.";
+    return t("errors.domain");
   }
   if (code.includes("wrong-password") || code.includes("invalid-credential")) {
-    return "Email or password is incorrect.";
+    return t("errors.credentials");
   }
   if (code.includes("email-already-in-use")) {
-    return "This email already has an account. Try signing in instead.";
+    return t("errors.exists");
   }
   return message;
 }
@@ -96,7 +100,7 @@ function friendlyAuthError(error) {
 function openAuth(options = {}) {
   state.afterLogin = options.afterLogin || null;
   qs("#authModal")?.classList.remove("hidden");
-  setStatus(state.configured ? "Continue with Google or email." : "Firebase is not configured yet.", !state.configured);
+  setStatus(state.configured ? t("auth.note") : t("errors.config"), !state.configured);
 }
 
 function closeAuth() {
@@ -143,7 +147,7 @@ async function upsertMember(user) {
 }
 
 function userLabel(user) {
-  if (!user) return "Login";
+  if (!user) return t("auth.login");
   return user.displayName || user.email || "Account";
 }
 
@@ -152,7 +156,7 @@ function updateAuthUI(user) {
     node.textContent = userLabel(user);
   });
   qsa("[data-auth-action='login']").forEach((button) => {
-    button.textContent = user ? "Account" : "Login";
+    button.textContent = user ? t("auth.account") : t("auth.login");
   });
   qsa("[data-member-only]").forEach((node) => {
     node.classList.toggle("hidden", !user);
@@ -164,7 +168,7 @@ function updateAuthUI(user) {
 
 async function signInGoogle() {
   if (!state.auth) throw new Error("Firebase is not configured yet.");
-  setStatus("Opening Google login...");
+  setStatus(t("auth.opening"));
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
   const result = await signInWithPopup(state.auth, provider);
@@ -178,11 +182,11 @@ async function emailAction(action) {
   if (!state.auth) throw new Error("Firebase is not configured yet.");
   const email = qs("#authEmail")?.value.trim();
   const password = qs("#authPassword")?.value;
-  if (!email) throw new Error("Enter your email first.");
-  if (action !== "reset" && !password) throw new Error("Enter your password.");
+  if (!email) throw new Error(t("auth.emailFirst"));
+  if (action !== "reset" && !password) throw new Error(t("auth.passwordFirst"));
   if (action === "reset") {
     await sendPasswordResetEmail(state.auth, email);
-    setStatus("Password reset email sent.");
+    setStatus(t("auth.resetSent"));
     return null;
   }
   const result =
@@ -217,7 +221,10 @@ async function initFirebase() {
 }
 
 function bindAuthUI() {
-  if (!qs("#authModal")) document.body.insertAdjacentHTML("beforeend", authTemplate());
+  if (!qs("#authModal")) {
+    document.body.insertAdjacentHTML("beforeend", authTemplate());
+    window.SajuPopI18n?.applyTranslations(qs("#authModal"));
+  }
   document.addEventListener("click", async (event) => {
     const authAction = event.target.closest("[data-auth-action]");
     if (authAction) {
@@ -260,7 +267,7 @@ window.SajuPopAuth = {
 };
 
 bindAuthUI();
+window.addEventListener("sajupop-locale-changed", () => updateAuthUI(state.user));
 initFirebase().finally(() => {
   window.dispatchEvent(new CustomEvent("sajupop-auth-ready", { detail: { configured: state.configured } }));
 });
-

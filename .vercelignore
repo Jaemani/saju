@@ -1,0 +1,6 @@
+_workspace/
+docs/audits/
+playwright-report/
+test-results/
+test/
+tests/

@@ -1,5 +1,31 @@
 # Update Notes
 
+## v0.4.0 - Native Voice Locales And UX Audit
+
+Date: 2026-07-22
+
+### Added
+
+- Added complete UI and generated-reading support for English, Korean, Simplified Chinese, Spanish, and Japanese.
+- Added locale-specific native voice rules and a quality repair pass for thin or machine-sounding reports.
+- Added a deterministic multilingual chart lexicon and section-level evidence layer so generated prose cannot rewrite the displayed Manse facts.
+- Added API-backed coverage for 248 countries and more than 7,000 city records.
+- Added Playwright coverage for the Korean journey and mobile layout checks across all five locales.
+- Added localization voice documentation and a screenshot-backed product design audit.
+- Added lunar-date conversion before solar-time correction and Four Pillars calculation.
+
+### Changed
+
+- Removed the remaining label/tone switch from the home page.
+- Reworked result hierarchy into overview, chart, full reading, and small actions.
+- Hid model names and internal writing-pass labels from customers.
+- Moved technical chart evidence into an optional explanation inside each reading section.
+- Turned mobile product, education, glossary, and quick-take groups into swipeable rails to reduce page length.
+- Reframed the guest account around saving value instead of unfinished management features.
+- Updated loading language and timing to support the native-language quality pass.
+- Reduced generation from three unconditional writing calls to one final draft plus one conditional repair, with a measured 1-3 minute loading estimate.
+- Disabled OpenAI response storage and added checks for misplaced stems, leaked editor instructions, untranslated chart labels, and superstition-shaped object remedies.
+
 ## v0.3.2 - Reading UX And Visual Hierarchy
 
 Date: 2026-07-09

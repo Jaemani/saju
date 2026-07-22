@@ -8,18 +8,23 @@ SajuPop is an overseas version of a low-price Korean Saju reading service. It be
 - `reading.html` - dedicated generated reading room with loading progress, result page, and login-ready checkout gate.
 - `account.html` - Firebase-backed member management page for profile, credits, plan, and saved reading placeholders.
 - `styles.css` - Y2K x Gen Z visual system with glossy chrome, aqua, lime, pink, and compact product cards.
+- `i18n.js` - complete interface localization for English, Korean, Simplified Chinese, Spanish, and Japanese.
 - `script.js` - category filtering, glossary filtering, accordions, country/city birth input, chart snapshots, and API rendering.
 - `reading.js` - result-page generation, progress state, and generated report rendering.
 - `auth.js` - Firebase Auth client for Google and email/password login.
 - `api/firebase-config.js` - Vercel endpoint that exposes public Firebase web config from env vars.
 - `api/saju-engine.js` - library-backed Manse core using `lunar-javascript`, city timezone lookup, IANA timezone offsets, DST handling, and longitude correction.
 - `api/generate-reading.js` - Vercel serverless endpoint for chart calculation and OpenAI reading generation.
+- `api/locale-voice.js` - language-specific voice, empathy, rhythm, and anti-translation rules.
+- `api/locale-chart.js` - deterministic chart terminology, localized fact blocks, and section evidence for all supported languages.
+- `api/locations.js` - searchable country and city data for birthplace selection.
 - `firestore.rules` - user-scoped member document access rules.
 - `assets/pillars-orbit.svg` - reusable chart visual asset.
 - `docs/product-spec.md` - overseas product strategy, UX, monetization, and content logic.
 - `docs/benchmark-sajui.md` - benchmark notes from Saju-i and international adaptation rules.
 - `docs/saju-glossary-en.md` - English label system for Saju, Manse calendar, Ten Gods, stars, combinations, clashes, harms, and sample Korean terms.
 - `UPDATES.md` - version notes.
+- `tests/localized-ux.spec.js` - Playwright checks for localized home, loading, result, and account flows.
 
 ## Open The App
 
@@ -30,10 +35,18 @@ Open `index.html` directly for the static UI. To use live generated readings, de
 The current implementation separates chart structure from prose:
 
 1. The Manse core calculates year, month, day, and hour pillars, element balance, hidden stems, Ten Gods, symbolic stars, and relationship tags.
-2. The OpenAI Responses API generates a structured reading from the chart JSON.
-3. A second OpenAI pass rewrites the same JSON for empathy, encouragement, and polished Saju-i-style emotional tone.
+2. The server turns the chart into a compact localized fact block and assigns verified evidence to each reading section.
+3. The OpenAI Responses API writes a native-language structured report from only those allowed facts and self-edits once before returning it.
+4. Reports that miss density, terminology, factual-placement, or native-language checks receive one repair pass.
+5. Technical evidence is rebuilt from the Manse result after generation, so model prose cannot alter pillars, counts, or relationship tags.
 
-Set `OPENAI_MODEL` to override the default model. The default is `gpt-5-mini`.
+The default model is `gpt-5-mini`; set `OPENAI_MODEL` to override it. GPT-5 requests use low reasoning effort to reduce latency, and API responses are not stored by OpenAI (`store: false`). Generated reports and interface copy support `en`, `ko`, `zh-CN`, `es`, and `ja`.
+
+## Local Verification
+
+Run `npx vercel dev --listen 3101 --yes` for the static pages and serverless APIs. Run `npm run test:e2e` for localized Playwright checks.
+
+Writing and localization rules are documented in `docs/localization-voice-guide.md`. The latest visual audit is in `docs/audits/2026-07-22/audit.md`.
 
 ## Auth And Members
 

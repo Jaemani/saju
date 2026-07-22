@@ -1,4 +1,4 @@
-const { Solar } = require("lunar-javascript");
+const { Lunar, Solar } = require("lunar-javascript");
 const cityTimezones = require("city-timezones");
 const countriesAndTimezones = require("countries-and-timezones");
 
@@ -266,6 +266,23 @@ function parseBirthDate(input) {
   return { year, month, day, hour, minute };
 }
 
+function normalizeCalendarInput(input) {
+  const calendar = String(input.calendar || "Gregorian").toLowerCase();
+  if (!calendar.includes("lunar") && !calendar.includes("음력") && !calendar.includes("农历") && !calendar.includes("旧暦")) {
+    return { calculationInput: input, convertedFromLunar: false };
+  }
+  const original = parseBirthDate(input);
+  const solar = Lunar.fromYmdHms(original.year, original.month, original.day, original.hour, original.minute, 0).getSolar();
+  const date = `${solar.getYear()}-${String(solar.getMonth()).padStart(2, "0")}-${String(solar.getDay()).padStart(2, "0")}`;
+  const time = `${String(solar.getHour()).padStart(2, "0")}:${String(solar.getMinute()).padStart(2, "0")}`;
+  return {
+    calculationInput: { ...input, date, time },
+    convertedFromLunar: true,
+    originalLunarInput: original,
+    convertedSolarDate: { year: solar.getYear(), month: solar.getMonth(), day: solar.getDay(), hour: solar.getHour(), minute: solar.getMinute() }
+  };
+}
+
 function formatOffset(minutes) {
   const sign = minutes >= 0 ? "+" : "-";
   const abs = Math.abs(minutes);
@@ -440,8 +457,10 @@ function deriveBalance(elementCounts) {
 }
 
 function calculateSaju(input = {}) {
-  const location = resolveLocation(input);
-  const correction = correctBirthTime(input, location);
+  const calendarConversion = normalizeCalendarInput(input);
+  const calculationInput = calendarConversion.calculationInput;
+  const location = resolveLocation(calculationInput);
+  const correction = correctBirthTime(calculationInput, location);
   const corrected = correction.corrected;
   const solar = Solar.fromYmdHms(corrected.year, corrected.month, corrected.day, corrected.hour, corrected.minute, 0);
   const lunar = solar.getLunar();
@@ -466,6 +485,7 @@ function calculateSaju(input = {}) {
       birthplace: input.birthplace,
       city: input.city || location.city,
       country: input.country || location.country,
+      locale: input.locale || "en",
       calendar: input.calendar || "Gregorian",
       accuracy: input.accuracy || "Exact time",
       tone: input.tone || "Warm, trendy, and detailed"
@@ -481,7 +501,11 @@ function calculateSaju(input = {}) {
       eightCharacters: eightChar.toString(),
       sect: eightChar.getSect(),
       source: "lunar-javascript",
-      libraryBacked: true
+      libraryBacked: true,
+      inputCalendar: input.calendar || "Gregorian",
+      convertedFromLunar: calendarConversion.convertedFromLunar,
+      originalLunarInput: calendarConversion.originalLunarInput || null,
+      convertedSolarDate: calendarConversion.convertedSolarDate || null
     },
     dayMaster,
     pillars,
@@ -501,4 +525,3 @@ module.exports = {
   STEMS,
   BRANCHES
 };
-

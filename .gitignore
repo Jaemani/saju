@@ -9,3 +9,6 @@ build/
 sajupop-*.json
 *.log
 .vercel
+test-results/
+playwright-report/
+_workspace/

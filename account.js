@@ -2,6 +2,14 @@ function qs(selector) {
   return document.querySelector(selector);
 }
 
+function t(key, variables) {
+  return window.SajuPopI18n?.t(key, variables) || key;
+}
+
+function refreshIcons() {
+  window.lucide?.createIcons({ attrs: { "stroke-width": 1.8 } });
+}
+
 function escapeHtml(value) {
   return String(value || "")
     .replaceAll("&", "&amp;")
@@ -14,27 +22,28 @@ function escapeHtml(value) {
 function renderGuestAccount(root) {
   root.innerHTML = `
     <article class="account-card login-card">
-      <span class="account-mini-icon">四</span>
-      <h2>Login when you want to keep it.</h2>
-      <p>Generate a chart first. Use Google or email when you are ready to save readings, unlock checkout, or manage credits.</p>
-      <button class="primary-btn" type="button" data-auth-action="login">Login</button>
+      <span class="account-mini-icon"><i data-lucide="bookmark"></i></span>
+      <h2>${escapeHtml(t("account.loginTitle"))}</h2>
+      <p>${escapeHtml(t("account.loginBody"))}</p>
+      <button class="primary-btn" type="button" data-auth-action="login">${escapeHtml(t("auth.login"))}</button>
     </article>
     <article class="account-card account-preview-card vault-preview">
-      <span class="account-mini-icon">V</span>
-      <h2>Reading Vault</h2>
-      <p>Saved charts and paid reports will live here, separated from the public birth setup page.</p>
+      <span class="account-mini-icon"><i data-lucide="archive"></i></span>
+      <h2>${escapeHtml(t("account.vault"))}</h2>
+      <p>${escapeHtml(t("account.vaultBody"))}</p>
     </article>
     <article class="account-card account-preview-card credit-preview">
-      <span class="account-mini-icon">C</span>
-      <h2>Credit Wallet</h2>
-      <p>Star Credits and Moon Credits are ready for checkout integration after payment is connected.</p>
+      <span class="account-mini-icon"><i data-lucide="wallet-cards"></i></span>
+      <h2>${escapeHtml(t("account.wallet"))}</h2>
+      <p>${escapeHtml(t("account.walletBody"))}</p>
     </article>
     <article class="account-card account-preview-card privacy-preview">
-      <span class="account-mini-icon">P</span>
-      <h2>Private Profile</h2>
-      <p>Member records are scoped to your Firebase user id, so each account sees only its own saved data.</p>
+      <span class="account-mini-icon"><i data-lucide="shield-check"></i></span>
+      <h2>${escapeHtml(t("account.privacy"))}</h2>
+      <p>${escapeHtml(t("account.privacyBody"))}</p>
     </article>
   `;
+  refreshIcons();
 }
 
 function renderAccount(user, member) {
@@ -56,26 +65,27 @@ function renderAccount(user, member) {
       <div class="avatar">${photoURL ? `<img src="${photoURL}" alt="" />` : `<span>${initial}</span>`}</div>
       <h2>${displayName}</h2>
       <p>${email}</p>
-      <button class="primary-btn" type="button" data-auth-action="logout">Sign out</button>
+      <button class="primary-btn" type="button" data-auth-action="logout">${escapeHtml(t("account.signOut"))}</button>
     </article>
     <article class="account-card">
-      <h2>Credits</h2>
-      <div class="credit-row"><span>Star Credits</span><strong>${member?.starCredits ?? 0}</strong></div>
-      <div class="credit-row"><span>Moon Credits</span><strong>${member?.moonCredits ?? 0}</strong></div>
-      <p>Checkout integration will add credits after payment succeeds.</p>
+      <h2>${escapeHtml(t("account.credits"))}</h2>
+      <div class="credit-row"><span>${escapeHtml(t("account.starCredits"))}</span><strong>${member?.starCredits ?? 0}</strong></div>
+      <div class="credit-row"><span>${escapeHtml(t("account.moonCredits"))}</span><strong>${member?.moonCredits ?? 0}</strong></div>
+      <p>${escapeHtml(t("account.creditsBody"))}</p>
     </article>
     <article class="account-card">
-      <h2>Membership</h2>
-      <div class="credit-row"><span>Plan</span><strong>${member?.plan || "free"}</strong></div>
-      <div class="credit-row"><span>Providers</span><strong>${escapeHtml(providers)}</strong></div>
-      <p>Provider linking and paid tiers can be added after checkout is wired.</p>
+      <h2>${escapeHtml(t("account.membership"))}</h2>
+      <div class="credit-row"><span>${escapeHtml(t("account.plan"))}</span><strong>${member?.plan || "free"}</strong></div>
+      <div class="credit-row"><span>${escapeHtml(t("account.providers"))}</span><strong>${escapeHtml(providers)}</strong></div>
+      <p>${escapeHtml(t("account.membershipBody"))}</p>
     </article>
     <article class="account-card">
-      <h2>Vault</h2>
-      <div class="credit-row"><span>Saved Readings</span><strong>${member?.savedReadings ?? 0}</strong></div>
-      <p>Saved readings will appear here after report persistence is added.</p>
+      <h2>${escapeHtml(t("account.vault"))}</h2>
+      <div class="credit-row"><span>${escapeHtml(t("account.saved"))}</span><strong>${member?.savedReadings ?? 0}</strong></div>
+      <p>${escapeHtml(t("account.vaultEmpty"))}</p>
     </article>
   `;
+  refreshIcons();
 }
 
 window.addEventListener("sajupop-auth-changed", (event) => {
@@ -85,3 +95,14 @@ window.addEventListener("sajupop-auth-changed", (event) => {
 window.addEventListener("sajupop-auth-ready", () => {
   renderAccount(window.SajuPopAuth?.getCurrentUser(), window.SajuPopAuth?.getMember());
 });
+
+window.addEventListener("sajupop-locale-changed", () => {
+  renderAccount(window.SajuPopAuth?.getCurrentUser(), window.SajuPopAuth?.getMember());
+});
+
+function renderCurrentAccount() {
+  renderAccount(window.SajuPopAuth?.getCurrentUser(), window.SajuPopAuth?.getMember());
+}
+
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", renderCurrentAccount);
+else renderCurrentAccount();

@@ -12,32 +12,42 @@
         <span class="brand-mark">四</span>
         <span>
           <strong>SajuPop - Korean Four Pillars</strong>
-          <small>Member account</small>
+          <small data-i18n="global.accountSubtitle">Member account</small>
         </span>
       </a>
       <nav class="nav-links">
-        <a href="index.html#birth-form">New Chart</a>
-        <a href="reading.html">Reading Room</a>
+        <a href="index.html#birth-form" data-i18n="nav.newChart">New Chart</a>
+        <a href="reading.html" data-i18n="nav.readingRoom">Reading Room</a>
       </nav>
-      <button class="chrome-btn" type="button" data-auth-action="login" data-auth-label>Login</button>
+      <div class="top-actions">
+        <label class="language-control">
+          <span class="sr-only" data-i18n="global.language">Language</span>
+          <select data-language-selector aria-label="Language">
+            <option value="en">EN</option><option value="ko">한국어</option><option value="zh-CN">中文</option><option value="es">Español</option><option value="ja">日本語</option>
+          </select>
+        </label>
+        <button class="chrome-btn" type="button" data-auth-action="login" data-auth-label data-i18n="auth.login">Login</button>
+      </div>
     </header>
 
     <main class="app-shell account-shell">
       <section class="account-hero">
-        <p class="eyebrow">Member management</p>
-        <h1>Save charts, credits, and unlocked readings in one place.</h1>
-        <p>Generate a reading first. Login is only needed when you want to save it, unlock checkout, or keep member history.</p>
+        <p class="eyebrow" data-i18n="account.eyebrow">Your SajuPop space</p>
+        <h1 data-i18n="account.title">Your readings, whenever you want to return to them.</h1>
+        <p data-i18n="account.body">You can read first without an account. Sign in only to save a chart, unlock checkout, or keep your history.</p>
       </section>
       <section class="account-grid" id="accountContent">
         <article class="account-card login-card">
           <span class="account-mini-icon">四</span>
-          <h2>Login when you want to keep it.</h2>
-          <p>Sign in with Google or email to save readings, unlock checkout, and manage credits.</p>
-          <button class="primary-btn" type="button" data-auth-action="login">Login</button>
+          <h2 data-i18n="account.loginTitle">Save this for later</h2>
+          <p data-i18n="account.loginBody">Use Google or email when a reading feels worth keeping.</p>
+          <button class="primary-btn" type="button" data-auth-action="login" data-i18n="auth.login">Login</button>
         </article>
       </section>
     </main>
 
+    <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+    <script defer src="i18n.js"></script>
     <script type="module" src="auth.js"></script>
     <script defer src="account.js"></script>
   </body>

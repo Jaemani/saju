@@ -26,7 +26,7 @@ const req = {
     birthplace: "Los Angeles, United States",
     calendar: "Gregorian",
     accuracy: "Exact time",
-    tone: "Warm, trendy, and detailed"
+    locale: process.env.SMOKE_LOCALE || "en"
   }
 };
 
@@ -47,6 +47,7 @@ const res = {
       source: payload.source,
       model: payload.model,
       voicePasses: payload.voicePasses,
+      locale: payload.chart?.input?.locale,
       headline: payload.reading?.headline,
       pillars: payload.chart?.pillars?.map((pillar) => `${pillar.position}:${pillar.label}`),
       sectionCount: payload.reading?.sections?.length,
