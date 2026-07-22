@@ -19,9 +19,11 @@ The selected locale is stored in `localStorage` and included in the reading requ
 3. One model pass writes the final report with locale-specific rhythm, empathy, and clarity.
 4. The server checks section density, terminology, pillar placement, editor-language leakage, and common machine-writing signals.
 5. A report that misses the locale threshold receives one native-quality repair pass.
-6. The server replaces every `technicalBasis` field with deterministic evidence from the calculated chart.
+6. The server replaces every `technicalBasis` field with deterministic, plain-language evidence from the calculated chart.
 
-Chart facts, dates, numbers, Hanja, pillars, Ten Gods, and relationship markers must not change during the writing passes.
+The product uses two presentation layers. The visual Manse chart preserves canonical Hanja and pronunciation labels so a knowledgeable reader can verify the calculation. Reading titles, bodies, actions, and expandable evidence translate those markers into meaning: `Yang Fire over Tiger (Wood)`, `structure and responsibility`, or `a subtle friction pattern`. Raw eight-character strings, pinyin pillar codes, and branch-code relationships do not belong in prose.
+
+Dates, element counts, pillar ownership, Ten God relationships, and relationship markers must not change during the writing passes. The server may change notation only by replacing a calculated marker with its locale-specific semantic equivalent.
 
 Colors, jewelry, plants, room directions, and similar objects are not presented as causal remedies. Suggested actions must be ordinary, low-risk experiments such as changing a schedule, writing down a decision, asking for help, or setting a boundary.
 
@@ -38,6 +40,8 @@ Colors, jewelry, plants, room directions, and similar objects are not presented 
 ## Korean
 
 The Korean rules incorporate the local `humanize-korean` quick rules: remove translation-shaped phrases, repeated formal nouns, mechanical connectors, uniform endings, inflated reassurance, and unnecessary English words. The product uses a steady `해요체`, limits repeated `거든요` and `답니다`, and prefers `풀이` over `리딩` and `오행/기운` over the generic `요소` when discussing the chart.
+
+Korean prose uses forms such as `병화`, `병인일주의 흐름`, and `수 기운` instead of repeatedly showing `丙`, `丙寅`, or `Bing-Yin`. Chinese and Japanese may use native characters when they improve readability, but never add pinyin or romanized pillar codes. English and Spanish prose use no chart Hanja.
 
 The Fast Path review artifact is saved at `_workspace/2026-07-22-001/final.md`.
 

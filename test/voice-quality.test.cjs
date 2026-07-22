@@ -2,7 +2,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const { postProcessReading, readingQualityIssues, normalizeModelReading } = require("../api/generate-reading");
 const { calculateSaju } = require("../api/saju-engine");
-const { applyTechnicalEvidence, localizeChartText } = require("../api/locale-chart");
+const { applyTechnicalEvidence, localizeChartText, localizedChartFacts, simplifyReadingNotation } = require("../api/locale-chart");
 
 const keys = ["core_metaphor", "element_balance", "day_master", "reality_check", "validation", "personality", "career", "money", "love", "family", "friends", "location", "lucky_actions"];
 
@@ -99,7 +99,7 @@ test("Quality gate catches editor language and elemental object remedies", () =>
   assert.ok(issues.some((issue) => issue.includes("color, object")));
 });
 
-test("Technical evidence is rebuilt from the calculated chart", () => {
+test("Technical evidence is rebuilt from the calculated chart in readable language", () => {
   const chart = calculateSaju({
     name: "Mina", date: "2000-07-29", time: "22:01", city: "Los Angeles", country: "United States", locale: "zh-CN"
   });
@@ -108,8 +108,59 @@ test("Technical evidence is rebuilt from the calculated chart", () => {
   };
   const result = applyTechnicalEvidence(reading, chart, "zh-CN");
   assert.equal(result.sections[0].technicalBasis.includes("年干是癸"), false);
-  assert.match(result.sections[0].technicalBasis, /戊子/);
-  assert.match(result.sections[0].technicalBasis, /日主/);
+  assert.equal(result.sections[0].technicalBasis.includes("戊子"), false);
+  assert.match(result.sections[0].technicalBasis, /阳土/);
+  assert.match(result.sections[0].technicalBasis, /自我核心/);
+});
+
+test("English chart facts reserve Hanja and pinyin for the visual Manse chart", () => {
+  const chart = calculateSaju({
+    name: "Jaeman", date: "2002-02-27", time: "09:46", city: "Daegu", country: "South Korea", locale: "en"
+  });
+  const serialized = JSON.stringify(localizedChartFacts(chart, "en"));
+  assert.doesNotMatch(serialized, /[甲乙丙丁戊己庚辛壬癸子丑寅卯辰巳午未申酉戌亥]/);
+  assert.doesNotMatch(serialized, /\b(?:Jia|Yi|Bing|Ding|Wu|Ji|Geng|Xin|Ren|Gui)-(?:Zi|Chou|Yin|Mao|Chen|Si|Wu|Wei|Shen|You|Xu|Hai)\b/);
+  assert.match(serialized, /Yang Fire|Yang Water|Yin Water/);
+  assert.match(serialized, /identity and close relationships/);
+});
+
+test("Reading notation is translated into meaning instead of repeated", () => {
+  const chart = calculateSaju({
+    name: "Jaeman", date: "2002-02-27", time: "09:46", city: "Daegu", country: "South Korea", locale: "en"
+  });
+  const day = chart.pillars.find((pillar) => pillar.position === "Day");
+  const relation = chart.relationshipTags[0];
+  const raw = {
+    headline: `A story about ${day.stem.hanja} (${day.stem.pinyin}, ${day.stem.label})`,
+    summary: `The Day pillar is ${day.stem.hanja}${day.branch.hanja} (${day.label}).`,
+    sections: [{ key: "day_master", title: `${day.label} explained`, body: `The full chart is ${chart.manse.eightCharacters}. Its links include ${relation}.`, technicalBasis: relation }],
+    luckyActions: [`Remember ${day.label}`],
+    disclaimer: ""
+  };
+  const result = simplifyReadingNotation(raw, chart, "en");
+  const serialized = JSON.stringify(result);
+  assert.doesNotMatch(serialized, /[甲乙丙丁戊己庚辛壬癸子丑寅卯辰巳午未申酉戌亥]/);
+  assert.doesNotMatch(serialized, /\b(?:Jia|Yi|Bing|Ding|Wu|Ji|Geng|Xin|Ren|Gui)-(?:Zi|Chou|Yin|Mao|Chen|Si|Wu|Wei|Shen|You|Xu|Hai)\b/);
+  assert.match(serialized, new RegExp(day.stem.label));
+  assert.match(serialized, /over/);
+  assert.equal(serialized.includes(relation), false);
+});
+
+test("English quality gate rejects the raw notation shown in the reported sample", () => {
+  const chart = calculateSaju({
+    name: "Jaeman", date: "2002-02-27", time: "09:46", city: "Daegu", country: "South Korea", locale: "en"
+  });
+  const body = "There is a clear daily tension between warmth and pressure. Day Master is 丙 (Bing, Yang Fire), and Day pillar is 丙寅 (Bing-Yin). Hour pillar 癸巳 (Gui-Si) adds another technical label. The links include Yin-Si: Harm and Yin-Wu: Half Fire Combination. A practical pause can keep warmth available without forcing a performance every time. Give the response a little room before deciding what it has to mean.";
+  const reading = {
+    headline: "A campfire under a rainy sky",
+    summary: body,
+    sections: keys.map((key) => ({ key, title: "Section", body, technicalBasis: "丙寅 (Bing-Yin)" })),
+    luckyActions: []
+  };
+  const issues = readingQualityIssues(reading, "en", chart);
+  assert.ok(issues.some((issue) => issue.includes("pinyin")));
+  assert.ok(issues.some((issue) => issue.includes("Hanja")));
+  assert.ok(issues.some((issue) => issue.includes("repeated too often")));
 });
 
 test("Quality gate catches a stem assigned to the wrong pillar", () => {

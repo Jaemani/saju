@@ -1,6 +1,6 @@
 const { calculateSaju } = require("./saju-engine");
 const { localeVoice } = require("./locale-voice");
-const { TERM_MAPS, localizeChartText, localizedChartFacts, sectionEvidence, applyTechnicalEvidence } = require("./locale-chart");
+const { TERM_MAPS, localizeChartText, localizedChartFacts, sectionEvidence, applyTechnicalEvidence, simplifyReadingNotation } = require("./locale-chart");
 
 const REQUIRED_SECTION_KEYS = [
   "core_metaphor", "element_balance", "day_master", "reality_check", "validation", "personality", "career",
@@ -70,6 +70,8 @@ function voiceRules(voice) {
     "Avoid generic reassurance, textbook filler, repeated paragraph templates, and trendy slang that will date quickly.",
     "Never narrate the writing process. Do not say that you are acknowledging feelings, using one metaphor, explaining later, checking a chart, or following instructions.",
     "The user supplied birth data, not a personal story. Never say 'as you described', 'I hear', 'I sense', or pretend the user told you about an experience.",
+    "The visual Manse chart already holds the original symbols. Reading prose must translate chart notation into meaning instead of reciting symbols, pronunciations, pillar codes, or branch-code relationships.",
+    "Do not repeatedly enumerate the Hour, Day, Month, and Year pillars. Refer to a pillar only when its plain-language role materially helps that section.",
     "In at least eight sections, begin with a concrete everyday tension or recognizable inner contradiction in ordinary language. Bring in the chart evidence after that opening; do not start every section with a technical term.",
     "The body field is prose only. Never repeat technicalBasis, field names, JSON labels, editorial notes, or a labeled evidence line inside the body.",
     "No deterministic fear language, curses, guaranteed outcomes, or medical, legal, psychological, and financial instructions.",
@@ -89,7 +91,10 @@ function buildPrompt(chart) {
     "Write with the detail, affection, emotional specificity, and occasional directness of a premium Korean micro-reading, but do not imitate or copy any source text.",
     "The objective chart data is already calculated by a library-backed Manse engine. The localized fact block below is the only factual source you may use.",
     "Do not recount stems, move a marker to another pillar, infer an absent marker, or turn a symbolic star into a promised event. If a fact is not in the block, leave it out.",
-    "Explain Korean Saju concepts for a first-time reader. Keep the original Hanja, pinyin, and proper chart names when useful, then explain them naturally in the output language.",
+    "Explain Korean Saju concepts for a first-time reader in plain language. The visual Manse chart preserves the canonical symbols; never repeat raw pillar strings or pronunciation codes in the reading prose.",
+    "For English and Spanish, use zero Hanja, pinyin, or branch codes such as Bing-Yin, Gui-Si, Yin-Wu, or Yin-Si-Shen. Say 'a Yang Fire center', 'Yang Fire over Tiger', 'a subtle friction pattern', or the natural equivalent in the output language.",
+    "For Korean, prefer 병화 일간, 병인일주의 흐름, 수 기운, and plain everyday explanations. Do not repeat 丙, 丙寅, Bing, or Bing-Yin. For Chinese and Japanese, native characters may appear when natural, but never add pinyin or romanized pillar codes.",
+    "Across the entire report, use the technical label Day Master or its localized equivalent at most once. After that, describe the person's central quality directly.",
     "Use the person's name naturally. Do not repeat it at the start of every section.",
     "Safety rules: no medical, legal, psychological diagnosis, guaranteed wealth, guaranteed marriage, curses, or deterministic fear claims.",
     `Return sections as an object with exactly these 13 required properties: ${REQUIRED_SECTION_KEYS.join(", ")}. Each property contains only title and body.`,
@@ -97,6 +102,7 @@ function buildPrompt(chart) {
     "For each section, refer only to the facts listed under that section key in SECTION EVIDENCE. Do not derive parents, childhood, trauma, health, wealth, marriage, or a future event from missing information.",
     "Use no more than one compact chart-evidence sentence in most bodies; the element-balance section may use two. Spend the remaining sentences on lived nuance, emotional recognition, and a grounded adjustment.",
     "Do not use a symbolic star as proof for a Ten God, a hidden stem as proof for a visible pillar, or a combination as proof that a helper, partner, or event will appear.",
+    "The visible element counts include both the sky signs and ground signs. Call them the visible layer or visible element counts, never 'visible stems'. The inner weighting adds hidden signs and is a comparison aid, not a classical strength verdict.",
     "Do not write technicalBasis or a labeled evidence line. The server adds verified technical evidence after generation. Never place writing instructions or notes to the editor in any user-facing field.",
     "Write luckyActions as low-risk experiments. Do not include element-colored objects, plants, accessories, directions, percentages, investment instructions, or claims that an action changes fate.",
     "",
@@ -208,6 +214,24 @@ function readingQualityIssues(reading, locale, chart) {
     const shortBodies = bodies.filter((body) => body.length < 250).length;
     if (shortBodies) issues.push(`${shortBodies} Korean section bodies are under 250 characters.`);
   }
+  if (["en", "es"].includes(locale)) {
+    const rawPinyin = /\b(?:Jia|Yi|Bing|Ding|Wu|Ji|Geng|Xin|Ren|Gui)-(?:Zi|Chou|Yin|Mao|Chen|Si|Wu|Wei|Shen|You|Xu|Hai)\b|\((?:Jia|Yi|Bing|Ding|Wu|Ji|Geng|Xin|Ren|Gui)(?:,|\))/;
+    if (rawPinyin.test(allText)) issues.push("Replace pinyin and romanized pillar codes with plain-language chart meanings.");
+    if (chart) {
+      const protectedText = [chart.input?.name, chart.input?.city, chart.input?.country].filter(Boolean).reduce((text, value) => text.split(value).join(""), allText);
+      const rawGlyphs = new Set(chart.pillars.flatMap((pillar) => [pillar.stem.hanja, pillar.branch.hanja, ...(pillar.hiddenStems || []).map((stem) => stem.hanja)]));
+      if ([...rawGlyphs].some((glyph) => protectedText.includes(glyph))) issues.push("Keep Hanja in the visual Manse chart; replace it with plain-language meaning in the reading.");
+    }
+    const technicalReferences = (allText.match(/\b(?:Day Master|Day pillar|Hour pillar|Month pillar|Year pillar)\b/gi) || []).length;
+    if (technicalReferences > 3) issues.push("Technical pillar labels are repeated too often. Explain the qualities they represent instead of recounting the chart.");
+  }
+  if (locale === "ko" && chart) {
+    const protectedText = [chart.input?.name, chart.input?.city, chart.input?.country].filter(Boolean).reduce((text, value) => text.split(value).join(""), allText);
+    const rawGlyphs = new Set(chart.pillars.flatMap((pillar) => [pillar.stem.hanja, pillar.branch.hanja, ...(pillar.hiddenStems || []).map((stem) => stem.hanja)]));
+    if ([...rawGlyphs].some((glyph) => protectedText.includes(glyph)) || /\b(?:Jia|Yi|Bing|Ding|Wu|Ji|Geng|Xin|Ren|Gui)-(?:Zi|Chou|Yin|Mao|Chen|Si|Wu|Wei|Shen|You|Xu|Hai)\b/.test(allText)) {
+      issues.push("한자와 병음은 만세력 표에만 두고, 풀이에서는 병화·병인일주처럼 자연스러운 한국어 의미로 바꾸세요.");
+    }
+  }
   if (locale === "zh-CN" && (allText.match(/这意味着/g) || []).length > 3) issues.push("'这意味着' is repeated too often.");
   if (locale === "zh-CN" && (allText.match(/承认/g) || []).length > 2) issues.push("'承认' is repeated too often; show understanding directly instead of announcing it.");
   if (locale === "es" && (allText.match(/esto significa/gi) || []).length > 3) issues.push("'esto significa' is repeated too often.");
@@ -215,26 +239,27 @@ function readingQualityIssues(reading, locale, chart) {
   return issues;
 }
 
-function postProcessReading(reading, locale) {
+function postProcessReading(reading, locale, chart) {
+  const working = simplifyReadingNotation(reading, chart, locale);
   const stripEmbeddedEvidence = (value) => String(value || "")
     .replace(/\n+\s*(?:technicalBasis|technical basis|기술 근거|技术依据|技術的根拠)\s*[:：][\s\S]*$/i, "")
     .replace(/\n+\s*[（(](?:근거|依据|根拠|base técnica)\s*[:：][\s\S]*[）)]\s*$/i, "")
     .trim();
   const transform = (replaceText, replaceTechnical = replaceText) => ({
-    ...reading,
-    headline: replaceText(reading.headline),
-    summary: replaceText(reading.summary),
-    sections: (reading.sections || []).map((section) => ({
+    ...working,
+    headline: replaceText(working.headline),
+    summary: replaceText(working.summary),
+    sections: (working.sections || []).map((section) => ({
       ...section,
       title: replaceText(section.title),
       body: stripEmbeddedEvidence(replaceText(section.body)),
       technicalBasis: replaceTechnical(section.technicalBasis)
     })),
-    luckyActions: (reading.luckyActions || []).map(replaceText),
-    disclaimer: replaceText(reading.disclaimer)
+    luckyActions: (working.luckyActions || []).map(replaceText),
+    disclaimer: replaceText(working.disclaimer)
   });
 
-  if (locale === "en") return reading;
+  if (locale === "en") return transform((value) => String(value || ""));
 
   const replaceLocalizedTerms = (value) => {
     let text = localizeChartText(value, locale);
@@ -315,6 +340,7 @@ function buildRepairPrompt(chart, reading, issues) {
     "Fix every listed issue. Expand thin sections with chart-specific emotional detail and practical nuance, not filler.",
     "Do not describe the editing process, mention these checks, or repeat phrases from these instructions in the output.",
     "Never claim the user described an experience. Never recommend colors, objects, plants, directions, or elemental remedies.",
+    "Keep canonical symbols in the visual Manse chart only. Remove Hanja, pinyin, raw pillar strings, and branch-code relationships from prose, and replace them with natural plain-language meanings.",
     "Do not mention this quality check in the output.",
     "",
     "Failed checks:",
@@ -473,7 +499,7 @@ async function callOpenAI(chart) {
         buildPrompt(chart),
         `Write a final, native-quality Korean Saju/Four Pillars reading in ${voice.name}. Use only the supplied localized facts and silently self-edit before returning the structured response.`
       );
-      reading = applyTechnicalEvidence(postProcessReading(reading, voice.locale), chart, voice.locale);
+      reading = applyTechnicalEvidence(postProcessReading(reading, voice.locale, chart), chart, voice.locale);
       const voicePasses = [`${voice.locale}-native-draft`];
       const issues = readingQualityIssues(reading, voice.locale, chart);
       if (issues.length) {
@@ -483,7 +509,7 @@ async function callOpenAI(chart) {
             buildRepairPrompt(chart, reading, issues),
             `Repair a ${voice.name} Saju reading using only verified localized evidence. Remove machine-writing patterns and return the final structured response.`
           );
-          reading = applyTechnicalEvidence(postProcessReading(reading, voice.locale), chart, voice.locale);
+          reading = applyTechnicalEvidence(postProcessReading(reading, voice.locale, chart), chart, voice.locale);
           voicePasses.push(`${voice.locale}-native-quality-repair`);
         } catch (repairError) {
           return {
@@ -524,7 +550,7 @@ async function handler(req, res) {
     const voice = localeVoice(body.locale);
     const chart = calculateSaju({ ...body, locale: voice.locale });
     const result = await callOpenAI(chart);
-    result.reading = postProcessReading(result.reading, voice.locale);
+    result.reading = postProcessReading(result.reading, voice.locale, chart);
     res.status(200).json({ ok: true, chart, ...result });
   } catch (error) {
     res.status(500).json({ ok: false, error: error.message || "Unable to generate reading" });

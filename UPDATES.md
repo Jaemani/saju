@@ -1,5 +1,22 @@
 # Update Notes
 
+## v0.4.1 - Plain-Language Reading Evidence
+
+Date: 2026-07-22
+
+### Changed
+
+- Separated canonical chart notation from reading prose: Hanja and pronunciation labels remain in the visual Manse chart, while the report explains their meaning in natural language.
+- Replaced repeated pillar strings such as `丙寅 (Bing-Yin)` with readable descriptions such as `Yang Fire over Tiger (Wood)`.
+- Replaced branch-code relationships such as `Yin-Si: Harm` with meaning-led phrases such as `a subtle friction pattern`.
+- Rewrote deterministic section evidence around identity, inner qualities, pressure, resources, relationships, and balance instead of repeating all four pillars.
+- Clarified strongest and quietest element language and distinguished visible element counts from hidden-layer weighting.
+
+### Quality
+
+- Added output checks for Hanja, pinyin, romanized pillar codes, and excessive technical-pillar repetition in English, Spanish, and Korean prose.
+- Added regression coverage based on the reported `丙 (Bing, Yang Fire)`, `Bing-Yin`, `Gui-Si`, and `Yin-Wu` leakage patterns.
+
 ## v0.4.0 - Native Voice Locales And UX Audit
 
 Date: 2026-07-22
