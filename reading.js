@@ -22,6 +22,29 @@ const loadingStages = [
   "loading.long"
 ];
 
+const sectionCategoryKeys = {
+  core_metaphor: "result.categoryCore",
+  element_balance: "result.categoryElements",
+  day_master: "result.categoryIdentity",
+  reality_check: "result.categoryBlindSpot",
+  validation: "result.categoryEffort",
+  personality: "result.categoryPersonality",
+  career: "result.categoryCareer",
+  money: "result.categoryMoney",
+  love: "result.categoryLove",
+  family: "result.categoryFamily",
+  friends: "result.categoryFriends",
+  location: "result.categoryEnvironment",
+  lucky_actions: "result.categoryPractice"
+};
+
+const readingGroups = [
+  { label: "result.groupSelf", keys: ["core_metaphor", "element_balance", "day_master", "reality_check", "validation", "personality"] },
+  { label: "result.groupChoices", keys: ["career", "money"] },
+  { label: "result.groupRelationships", keys: ["love", "family", "friends"] },
+  { label: "result.groupDirection", keys: ["location", "lucky_actions"] }
+];
+
 function qs(selector) {
   return document.querySelector(selector);
 }
@@ -186,14 +209,18 @@ function renderBriefCards(reading, chart) {
 
 function sectionMarkup(section, index) {
   const closed = index > 1;
+  const bodyId = `reading-section-${section.key}`;
   return `
-    <article class="generated-section ${closed ? "closed" : ""}">
-      <button class="accordion-trigger generated-trigger" type="button">
+    <article class="generated-section ${closed ? "closed" : ""}" id="reading-${escapeHtml(section.key)}">
+      <button class="accordion-trigger generated-trigger" type="button" aria-expanded="${closed ? "false" : "true"}" aria-controls="${bodyId}">
         <small>${String(index + 1).padStart(2, "0")}</small>
-        <b>${escapeHtml(section.title)}</b>
-        <span>${closed ? "+" : "-"}</span>
+        <span class="generated-heading">
+          <em>${escapeHtml(t(sectionCategoryKeys[section.key] || "result.reading"))}</em>
+          <b>${escapeHtml(section.title)}</b>
+        </span>
+        <span class="accordion-symbol" aria-hidden="true">${closed ? "+" : "-"}</span>
       </button>
-      <div class="accordion-body generated-body">
+      <div class="accordion-body generated-body" id="${bodyId}">
         <p>${escapeHtml(section.body)}</p>
         <details class="technical-note">
           <summary>${escapeHtml(t("result.why"))}</summary>
@@ -202,6 +229,24 @@ function sectionMarkup(section, index) {
       </div>
     </article>
   `;
+}
+
+function renderReadingGroups(reading) {
+  const sectionsByKey = new Map((reading.sections || []).map((section) => [section.key, section]));
+  let sectionIndex = 0;
+  return readingGroups
+    .map((group) => {
+      const sections = group.keys.map((key) => sectionsByKey.get(key)).filter(Boolean);
+      if (!sections.length) return "";
+      const markup = sections.map((section) => sectionMarkup(section, sectionIndex++)).join("");
+      return `
+        <section class="reading-group" aria-label="${escapeHtml(t(group.label))}">
+          <div class="reading-group-label"><span>${escapeHtml(t(group.label))}</span></div>
+          <div class="reading-group-sections">${markup}</div>
+        </section>
+      `;
+    })
+    .join("");
 }
 
 function renderGenerated(payload) {
@@ -246,7 +291,7 @@ function renderGenerated(payload) {
     </div>
     <div class="tag-strip">${tags || `<span>${escapeHtml(t("result.noLinks"))}</span>`}</div>
     <div class="section-divider" id="readingDetails"><span>${escapeHtml(t("result.reading"))}</span></div>
-    <div class="generated-list">${(reading.sections || []).map(sectionMarkup).join("")}</div>
+    <div class="generated-list">${renderReadingGroups(reading)}</div>
     <div class="lucky-box">
       <h3>${escapeHtml(t("result.actionsTitle"))}</h3>
       <ul>${(reading.luckyActions || []).map((action) => `<li>${escapeHtml(action)}</li>`).join("")}</ul>
@@ -265,7 +310,9 @@ function renderGenerated(payload) {
     trigger.addEventListener("click", () => {
       const item = trigger.closest(".generated-section");
       item.classList.toggle("closed");
-      trigger.querySelector("span").textContent = item.classList.contains("closed") ? "+" : "-";
+      const closed = item.classList.contains("closed");
+      trigger.setAttribute("aria-expanded", String(!closed));
+      trigger.querySelector(".accordion-symbol").textContent = closed ? "+" : "-";
     });
   });
 }

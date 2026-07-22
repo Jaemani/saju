@@ -1,5 +1,25 @@
 # Update Notes
 
+## v0.4.2 - Evidence-Led Empathy And Reading Categories
+
+Date: 2026-07-22
+
+### Changed
+
+- Replaced numeric Five Element inventories in prose and expandable evidence with qualitative descriptions of the leading, supporting, quiet, and absent energies. Exact values remain in the visual chart.
+- Required the identity center to appear naturally in the reading, such as `무토가 중심을 잡는 사주라`, instead of as an isolated technical note.
+- Rebalanced the Korean voice toward evidence-led empathy: the reading may gently identify delay, rigidity, relationship strain, or other practical costs instead of resolving every section with reassurance.
+- Limited blanket consolation, repeated `괜찮아요` endings, repeated names in section titles, and formulaic tradeoff language.
+- Removed editor-facing phrases such as `이 한 문장은 지지의 제안입니다`, notation-count announcements, and appended `근거:` sentences.
+- Grouped the 13 reading sections into self-understanding, real-world choices, relationships, and environment/next steps.
+- Added visible category labels including career, money, love, family, social relationships, personality, and practical guidance while preserving generated curiosity-led titles.
+
+### Quality
+
+- Added checks for numeric element lists, excessive reassurance, invented personal history, repeated recap paragraphs, purchased-action suggestions, and missing respectful correction.
+- Added deterministic cleanup for numeric inventories, editor asides, Korean semicolon chains, and stray closing quotation marks.
+- Expanded localized UX coverage to assert the new Korean career, money, love, and social category labels.
+
 ## v0.4.1 - Plain-Language Reading Evidence
 
 Date: 2026-07-22

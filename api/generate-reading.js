@@ -9,7 +9,7 @@ const REQUIRED_SECTION_KEYS = [
 
 const SECTION_PURPOSES = {
   core_metaphor: "Give one memorable image, then describe the central emotional contradiction without turning the whole body into poetry.",
-  element_balance: "Explain which response is overused and which quality needs room. Only this section may dwell on numeric element counts.",
+  element_balance: "Explain which response is overused and which quality needs room. Use qualitative element relationships only; never print the numeric inventory.",
   day_master: "Describe identity, private standards, and how the person restores a sense of self. Keep technical explanation compact.",
   reality_check: "Show where a once-useful protective pattern becomes tiring, explain why it may have felt safer, and offer a realistic alternative without blame.",
   validation: "This is the emotional center. Recognize quiet effort and pressure in specific language; keep advice to the final sentence.",
@@ -29,7 +29,7 @@ const SECTION_CONTENT_SCHEMA = {
   required: ["title", "body"],
   properties: {
     title: { type: "string" },
-    body: { type: "string", minLength: 340, maxLength: 1100 }
+    body: { type: "string", minLength: 200, maxLength: 1100 }
   }
 };
 
@@ -56,11 +56,45 @@ const RESPONSE_SCHEMA = {
   }
 };
 
+const ELEMENT_COUNT_NAMES = {
+  en: ["Wood", "Fire", "Earth", "Metal", "Water"],
+  ko: ["목", "화", "토", "금", "수"],
+  "zh-CN": ["木", "火", "土", "金", "水"],
+  es: ["Madera", "Fuego", "Tierra", "Metal", "Agua"],
+  ja: ["木", "火", "土", "金", "水"]
+};
+
+function elementCountMentionCount(value, locale) {
+  return (ELEMENT_COUNT_NAMES[locale] || ELEMENT_COUNT_NAMES.en).filter((name) => {
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`${escaped}\\s*(?:기운\\s*)?[:=]?\\s*\\d+(?:\\.\\d+)?`, "i").test(String(value || ""));
+  }).length;
+}
+
+function hasNumericElementInventory(value, locale) {
+  return String(value || "").split(/(?<=[.!?。！？\n])/).some((sentence) => elementCountMentionCount(sentence, locale) >= 3);
+}
+
+function stripNumericElementInventories(value, locale) {
+  const protectedDecimals = String(value || "").replace(/(\d)\.(\d)/g, "$1__SAJU_DECIMAL__$2");
+  const chunks = protectedDecimals.match(/[^.!?。！？\n]+[.!?。！？]?|\n+/g) || [];
+  return chunks
+    .filter((chunk) => /^\n+$/.test(chunk) || elementCountMentionCount(chunk, locale) < 3)
+    .join("")
+    .replaceAll("__SAJU_DECIMAL__", ".")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function voiceRules(voice) {
   return [
     "Voice target: emotionally perceptive, observant, warm, modern, and specific.",
     "The reader should feel understood rather than evaluated. Recognize the lived pressure before giving advice.",
+    "Let analysis be the visible form and empathy the underlying stance. Do not substitute reassurance for reasoning.",
+    "The person is not automatically right about every habit. Make the reality-check section candid, then add a gentle corrective observation only in two or three domain sections where the evidence clearly supports it. Do not force a downside into every section.",
+    "Praise only a specific strength supported by the chart. Mention a tradeoff when it genuinely clarifies that strength, not as a repeated formula. Avoid blanket consolation, automatic absolution, and endings that repeatedly say everything is okay.",
     "Every emotional claim must be traceable to chart data. Do not invent childhood events, trauma, family history, or relationship outcomes.",
+    "Describe present tendencies with calibrated language such as may, can, or often. Never invent a past reason for a habit or claim that a coping pattern was necessary earlier in life.",
     "Do not use therapy language such as trauma response, survival strategy, attachment style, nervous-system regulation, emotional absorption, or diagnosis unless the user supplied that context.",
     "The chart's helpfulElements field is a simple visualization heuristic, not a classical Yongshin determination. Call these balance cues, never a definitive remedy, and do not claim that colors, objects, or directions causally change fate.",
     "Do not recommend lucky colors, jewelry, plants, room directions, bed directions, or decorative objects as remedies. Practical actions should be ordinary choices such as scheduling, writing, resting, moving, asking, or setting a boundary.",
@@ -72,6 +106,8 @@ function voiceRules(voice) {
     "The user supplied birth data, not a personal story. Never say 'as you described', 'I hear', 'I sense', or pretend the user told you about an experience.",
     "The visual Manse chart already holds the original symbols. Reading prose must translate chart notation into meaning instead of reciting symbols, pronunciations, pillar codes, or branch-code relationships.",
     "Do not repeatedly enumerate the Hour, Day, Month, and Year pillars. Refer to a pillar only when its plain-language role materially helps that section.",
+    "Never label a sentence as supportive, analytical, a suggestion, or an interpretation. Do not add editorial asides such as '(this sentence is a supportive suggestion)'. Let its function be clear from the writing itself.",
+    "Integrate chart evidence into the observation itself. Do not introduce it with labels such as 'the reason is', 'the evidence is', 'the chart marker says', or announce that a technical term appears only once.",
     "In at least eight sections, begin with a concrete everyday tension or recognizable inner contradiction in ordinary language. Bring in the chart evidence after that opening; do not start every section with a technical term.",
     "The body field is prose only. Never repeat technicalBasis, field names, JSON labels, editorial notes, or a labeled evidence line inside the body.",
     "No deterministic fear language, curses, guaranteed outcomes, or medical, legal, psychological, and financial instructions.",
@@ -94,15 +130,18 @@ function buildPrompt(chart) {
     "Explain Korean Saju concepts for a first-time reader in plain language. The visual Manse chart preserves the canonical symbols; never repeat raw pillar strings or pronunciation codes in the reading prose.",
     "For English and Spanish, use zero Hanja, pinyin, or branch codes such as Bing-Yin, Gui-Si, Yin-Wu, or Yin-Si-Shen. Say 'a Yang Fire center', 'Yang Fire over Tiger', 'a subtle friction pattern', or the natural equivalent in the output language.",
     "For Korean, prefer 병화 일간, 병인일주의 흐름, 수 기운, and plain everyday explanations. Do not repeat 丙, 丙寅, Bing, or Bing-Yin. For Chinese and Japanese, native characters may appear when natural, but never add pinyin or romanized pillar codes.",
+    "Name the localized identity center naturally in the summary or core section, then connect it once more to behavior in the identity section. Weave it into the sentence, for example '무토가 중심을 잡는 사주라' rather than placing it in a technical aside.",
     "Across the entire report, use the technical label Day Master or its localized equivalent at most once. After that, describe the person's central quality directly.",
     "Use the person's name naturally. Do not repeat it at the start of every section.",
+    "Use the person's name in the headline or summary and only a few section titles at most. Most titles should create curiosity through the actual topic, not through repeated direct address.",
     "Safety rules: no medical, legal, psychological diagnosis, guaranteed wealth, guaranteed marriage, curses, or deterministic fear claims.",
     `Return sections as an object with exactly these 13 required properties: ${REQUIRED_SECTION_KEYS.join(", ")}. Each property contains only title and body.`,
     "Do not collapse sections into generic advice. Each one needs at least one concrete chart reference and one recognizable life pattern.",
     "For each section, refer only to the facts listed under that section key in SECTION EVIDENCE. Do not derive parents, childhood, trauma, health, wealth, marriage, or a future event from missing information.",
     "Use no more than one compact chart-evidence sentence in most bodies; the element-balance section may use two. Spend the remaining sentences on lived nuance, emotional recognition, and a grounded adjustment.",
+    "Keep each body cohesive. Do not append a second recap paragraph that restates the same evidence, advice, cost, or benefit in different words.",
     "Do not use a symbolic star as proof for a Ten God, a hidden stem as proof for a visible pillar, or a combination as proof that a helper, partner, or event will appear.",
-    "The visible element counts include both the sky signs and ground signs. Call them the visible layer or visible element counts, never 'visible stems'. The inner weighting adds hidden signs and is a comparison aid, not a classical strength verdict.",
+    "Element profiles are intentionally qualitative. Describe what leads, supports, stays quiet, or does not appear in a layer. Never reconstruct or print element counts, decimals, ratios, or a five-item numeric inventory; exact values already live in the visual chart.",
     "Do not write technicalBasis or a labeled evidence line. The server adds verified technical evidence after generation. Never place writing instructions or notes to the editor in any user-facing field.",
     "Write luckyActions as low-risk experiments. Do not include element-colored objects, plants, accessories, directions, percentages, investment instructions, or claims that an action changes fate.",
     "",
@@ -125,7 +164,7 @@ function readingQualityIssues(reading, locale, chart) {
   const bodies = (reading.sections || []).map((section) => String(section.body || ""));
   const technical = (reading.sections || []).map((section) => String(section.technicalBasis || ""));
   const averageLength = bodies.length ? bodies.reduce((sum, body) => sum + body.length, 0) / bodies.length : 0;
-  const minimumAverage = { ko: 270, "zh-CN": 220, ja: 240, en: 520, es: 520 }[locale] || 480;
+  const minimumAverage = { ko: 190, "zh-CN": 220, ja: 240, en: 520, es: 520 }[locale] || 480;
   const issues = [];
   const keys = (reading.sections || []).map((section) => section.key);
   const missingKeys = REQUIRED_SECTION_KEYS.filter((key) => !keys.includes(key));
@@ -174,13 +213,24 @@ function readingQualityIssues(reading, locale, chart) {
   }
 
   const processLeaks = {
-    ko: [/먼저 (?:마음|감정).{0,12}(?:받아|헤아)/, /(?:이 풀이|이 글|이 보고서)에서는/, /뒤에서 .*설명/, /비유는 .*하나/],
+    ko: [/먼저 (?:마음|감정).{0,12}(?:받아|헤아)/, /(?:이 풀이|이 글|이 보고서)에서는/, /뒤에서 .*설명/, /비유는 .*하나/, /이 (?:한 )?문장은.{0,24}(?:제안|조언|지지)/, /지지의 제안/, /(?:일간|용어|표기).{0,24}(?:한 문장|한 번|한번|사용)/, /(?:그 )?근거(?:로는|는|\s*[:：])/, /사주 표시/],
     "zh-CN": [/先承认/, /后文/, /接下来会/, /本报告/, /比喻.{0,8}(?:一个|一处)/],
     es: [/\b(?:Siento|Entiendo) (?:la|el|tu)\b/i, /que describes/i, /en este informe/i, /a continuación/i, /una metáfora por/i],
     ja: [/まず気持ち/, /受け止めます/, /本稿/, /次に説明/, /比喩は.{0,12}(?:一つ|ひとつ)/, /リーディング/]
   }[locale] || [];
   if (processLeaks.some((pattern) => pattern.test(allText))) {
     issues.push("Remove editor-facing process language and address the person's likely experience directly, without pretending they told you a story.");
+  }
+  const inventedHistoryPatterns = {
+    ko: [/과거에.{0,30}(?:필요|배웠|겪었)/, /어린 시절|어릴 때/, /그동안.{0,24}(?:버텨|견뎌|감당해)/],
+    en: [/in (?:your|the) past.{0,40}(?:needed|learned|had to)/i, /as a child|in childhood/i],
+    es: [/en (?:tu|el) pasado.{0,40}(?:necesit|aprend|tuviste que)/i, /de niñ[oa]|en la infancia/i],
+    "zh-CN": [/过去.{0,20}(?:需要|学会|不得不)/, /小时候|童年/],
+    ja: [/過去.{0,20}(?:必要|学ん|せざるを得)/, /子どもの頃|幼少期/]
+  }[locale] || [];
+  if (inventedHistoryPatterns.some((pattern) => pattern.test(allText))) issues.push("Do not invent a past event or reason from birth data. Keep the observation in the present and use calibrated language.");
+  if (hasNumericElementInventory(allText, locale)) {
+    issues.push("Remove the numeric Five Element inventory from prose. Describe which qualities lead, support, or stay quiet; exact values belong only in the visual chart.");
   }
 
   const technicalOpeners = {
@@ -194,7 +244,7 @@ function readingQualityIssues(reading, locale, chart) {
 
   const actionText = (reading.luckyActions || []).join("\n");
   const remedyPatterns = {
-    ko: [/행운의 색/, /(?:빨간색|노란색|흰색).*(?:소품|옷|액세서리)/, /(?:침대|책상).*(?:방향|머리)/, /식물을 .*두/],
+    ko: [/행운의 색/, /(?:빨간색|노란색|흰색).*(?:소품|옷|액세서리)/, /(?:침대|책상).*(?:방향|머리)/, /식물을 .*두/, /(?:소액|실험용)\s*(?:예산|비용)/, /(?:소액|유료)\s*(?:수업|워크숍|강의|모임)/],
     "zh-CN": [/(?:红色|橙色|暖色).*(?:小物|饰品|衣)/, /(?:放|摆).*植物/, /(?:床|桌).*(?:方向|朝向)/, /补[木火土金水](?:能|气)/],
     es: [/(?:color|tono) (?:rojo|naranja|blanco)/i, /(?:accesorio|joya|planta).*(?:equilibr|activar|energ)/i, /dirección (?:afortunada|favorable)/i],
     ja: [/(?:赤|オレンジ|白).*(?:小物|服|アクセサリー)/, /観葉植物.*(?:置|飾)/, /(?:ベッド|机).*(?:方角|向き)/, /[木火土金水]を補う/]
@@ -211,8 +261,25 @@ function readingQualityIssues(reading, locale, chart) {
     if (technical.some((text) => /^(manse|elements|dayMaster|relationshipTags|helpfulElements):/m.test(text))) {
       issues.push("technicalBasis still uses English property labels; explain those labels in Korean.");
     }
-    const shortBodies = bodies.filter((body) => body.length < 250).length;
-    if (shortBodies) issues.push(`${shortBodies} Korean section bodies are under 250 characters.`);
+    const shortBodies = bodies.filter((body) => body.length < 160).length;
+    if (shortBodies) issues.push(`${shortBodies} Korean section bodies are under 160 characters.`);
+    const consolationCount = (allText.match(/괜찮아요|좋아요|충분해요|잘하고 있어요|잘해왔어요/g) || []).length;
+    if ((allText.match(/괜찮아요/g) || []).length > 2 || consolationCount > 5) {
+      issues.push("허용과 위로 표현이 너무 자주 반복됩니다. '괜찮아요'로 결론내리기보다 근거, 장점의 대가, 조심할 점을 구체적으로 쓰세요.");
+    }
+    const correctiveBodies = bodies.filter((body) => /다만|그렇다고|문제는|주의|경계|놓치|지치게|부담을 주|미루|고집|과해|결과적으로/.test(body)).length;
+    if (correctiveBodies < 2) {
+      issues.push("한국어 풀이가 일방적인 위로에 치우쳤습니다. 팩트체크와 근거가 분명한 생활 영역 한두 곳에서는 이해되는 의도와 실제 결과를 함께 짚으세요.");
+    }
+    if (bodies.some((body) => body.includes(";"))) {
+      issues.push("한국어 본문에서 세미콜론으로 분석 문장을 이어 붙이지 말고, 자연스러운 문장 호흡으로 나누세요.");
+    }
+    if (bodies.filter((body) => /\n\s*\n/.test(body)).length > 2) issues.push("여러 섹션에 반복적인 덧붙임 문단이 생겼습니다. 같은 근거와 조언을 되풀이하지 말고 한 흐름으로 정리하세요.");
+    if ((allText.match(/비용|실질적 이득/g) || []).length > 5) issues.push("'비용'과 '실질적 이득'을 분석 공식처럼 반복하지 말고, 영역에 맞는 구체적인 결과를 자연스럽게 쓰세요.");
+    if (chart?.input?.name) {
+      const nameInTitles = (reading.sections || []).filter((section) => String(section.title || "").includes(chart.input.name)).length;
+      if (nameInTitles > 3) issues.push("이름이 너무 많은 섹션 제목에 반복됩니다. 이름 없이도 궁금증이 생기는 영역별 제목을 쓰세요.");
+    }
   }
   if (["en", "es"].includes(locale)) {
     const rawPinyin = /\b(?:Jia|Yi|Bing|Ding|Wu|Ji|Geng|Xin|Ren|Gui)-(?:Zi|Chou|Yin|Mao|Chen|Si|Wu|Wei|Shen|You|Xu|Hai)\b|\((?:Jia|Yi|Bing|Ding|Wu|Ji|Geng|Xin|Ren|Gui)(?:,|\))/;
@@ -241,22 +308,30 @@ function readingQualityIssues(reading, locale, chart) {
 
 function postProcessReading(reading, locale, chart) {
   const working = simplifyReadingNotation(reading, chart, locale);
+  const cleanGeneratedText = (value) => stripNumericElementInventories(value, locale)
+    .replace(/[（(]\s*이 (?:한 )?문장은\s*(?:지지의 )?(?:제안|조언|분석)(?:입니다|이에요)\.?\s*[）)]/g, "")
+    .replace(/[（(][^（）)]*(?:일간|용어|표기)[^（）)]*(?:한 문장|한 번|한번|사용)[^（）)]*[）)]/g, "")
+    .replace(/이 (?:한 )?문장은\s*(?:지지의 )?(?:제안|조언|분석)(?:입니다|이에요)\.?/g, "")
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/([.!?。！？])[\"”']+$/g, "$1")
+    .trim();
   const stripEmbeddedEvidence = (value) => String(value || "")
     .replace(/\n+\s*(?:technicalBasis|technical basis|기술 근거|技术依据|技術的根拠)\s*[:：][\s\S]*$/i, "")
     .replace(/\n+\s*[（(](?:근거|依据|根拠|base técnica)\s*[:：][\s\S]*[）)]\s*$/i, "")
+    .replace(/\s*(?:근거|분석 근거)\s*[:：][^\n]*$/i, "")
     .trim();
   const transform = (replaceText, replaceTechnical = replaceText) => ({
     ...working,
-    headline: replaceText(working.headline),
-    summary: replaceText(working.summary),
+    headline: cleanGeneratedText(replaceText(working.headline)),
+    summary: cleanGeneratedText(replaceText(working.summary)),
     sections: (working.sections || []).map((section) => ({
       ...section,
-      title: replaceText(section.title),
-      body: stripEmbeddedEvidence(replaceText(section.body)),
-      technicalBasis: replaceTechnical(section.technicalBasis)
+      title: cleanGeneratedText(replaceText(section.title)),
+      body: stripEmbeddedEvidence(cleanGeneratedText(replaceText(section.body))),
+      technicalBasis: cleanGeneratedText(replaceTechnical(section.technicalBasis))
     })),
-    luckyActions: (working.luckyActions || []).map(replaceText),
-    disclaimer: replaceText(working.disclaimer)
+    luckyActions: (working.luckyActions || []).map((action) => cleanGeneratedText(replaceText(action))),
+    disclaimer: cleanGeneratedText(replaceText(working.disclaimer))
   });
 
   if (locale === "en") return transform((value) => String(value || ""));
@@ -318,7 +393,11 @@ function postProcessReading(reading, locale, chart) {
     .replaceAll("차트", "사주")
     .replaceAll("생존 전략", "스스로를 지키려는 반응")
     .replaceAll("감정 흡수", "주변 분위기를 받아들이는 일")
-    .replaceAll("신경계 조절", "마음의 속도를 가라앉히는 일");
+    .replaceAll("신경계 조절", "마음의 속도를 가라앉히는 일")
+    .replace(/(?:그 )?근거(?:로는|는)\s*/g, "")
+    .replaceAll("사주 표시", "사주 흐름")
+    .replace(/([목화토금수]|물|불|흙|쇠)기운/g, "$1 기운")
+    .replace(/;\s*/g, ". ");
   const replaceTechnical = (value) => replaceKorean(value)
     .replace(/\bmanse:/gi, "만세력:")
     .replace(/\belements:/gi, "오행 분포:")
@@ -341,6 +420,7 @@ function buildRepairPrompt(chart, reading, issues) {
     "Do not describe the editing process, mention these checks, or repeat phrases from these instructions in the output.",
     "Never claim the user described an experience. Never recommend colors, objects, plants, directions, or elemental remedies.",
     "Keep canonical symbols in the visual Manse chart only. Remove Hanja, pinyin, raw pillar strings, and branch-code relationships from prose, and replace them with natural plain-language meanings.",
+    "Do not print numeric Five Element inventories. Do not label any sentence as support, analysis, or a suggestion. Replace blanket reassurance with evidence-led warmth. Keep direct correction selective; never append formulaic sentences about cost or practical benefit to every section, repeat the person's name in every title, or add recap paragraphs just to satisfy length.",
     "Do not mention this quality check in the output.",
     "",
     "Failed checks:",
@@ -501,8 +581,9 @@ async function callOpenAI(chart) {
       );
       reading = applyTechnicalEvidence(postProcessReading(reading, voice.locale, chart), chart, voice.locale);
       const voicePasses = [`${voice.locale}-native-draft`];
-      const issues = readingQualityIssues(reading, voice.locale, chart);
-      if (issues.length) {
+      let issues = readingQualityIssues(reading, voice.locale, chart);
+      const repairLimit = 1;
+      for (let repairIndex = 0; repairIndex < repairLimit && issues.length; repairIndex += 1) {
         try {
           reading = await requestStructuredReading(
             model,
@@ -510,24 +591,24 @@ async function callOpenAI(chart) {
             `Repair a ${voice.name} Saju reading using only verified localized evidence. Remove machine-writing patterns and return the final structured response.`
           );
           reading = applyTechnicalEvidence(postProcessReading(reading, voice.locale, chart), chart, voice.locale);
-          voicePasses.push(`${voice.locale}-native-quality-repair`);
+          voicePasses.push(`${voice.locale}-native-quality-repair-${repairIndex + 1}`);
+          issues = readingQualityIssues(reading, voice.locale, chart);
         } catch (repairError) {
           return {
             reading,
             model,
             source: "openai",
             voicePasses,
-            warning: `Native quality repair failed; returned the verified first pass: ${repairError.message}`
+            warning: `Native quality repair failed; returned the last verified pass: ${repairError.message}`
           };
         }
       }
-      const remainingIssues = readingQualityIssues(reading, voice.locale, chart);
       return {
         reading,
         model,
         source: "openai",
         voicePasses,
-        warning: remainingIssues.length ? `Native voice checks still flagged: ${remainingIssues.join(" ")}` : undefined
+        warning: issues.length ? `Native voice checks still flagged: ${issues.join(" ")}` : undefined
       };
     } catch (error) {
       lastError = error.message || "OpenAI request failed";

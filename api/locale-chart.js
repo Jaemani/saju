@@ -241,11 +241,55 @@ function localizeChartText(value, localeValue) {
     .reduce((text, [source, translated]) => text.replace(new RegExp(`\\b${source.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}\\b`, "g"), translated), String(value || ""));
 }
 
-function localizedElementCounts(counts, locale) {
-  return Object.fromEntries(Object.entries(counts || {}).map(([element, count]) => [
-    localizeChartText(element, locale),
-    Number.isInteger(count) ? count : Number(Number(count).toFixed(2))
-  ]));
+function joinElementNames(values, locale) {
+  const names = values.map((element) => localizeChartText(element, locale));
+  if (locale === "ko") return names.join("·");
+  if (locale === "zh-CN" || locale === "ja") return names.join("、");
+  if (names.length < 2) return names[0] || "";
+  const conjunction = locale === "es" ? " y " : " and ";
+  return `${names.slice(0, -1).join(", ")}${conjunction}${names.at(-1)}`;
+}
+
+function elementProfile(counts, localeValue) {
+  const locale = normalizeLocale(localeValue);
+  const entries = Object.entries(counts || {});
+  const positive = entries.filter(([, value]) => Number(value) > 0);
+  const maximum = Math.max(...positive.map(([, value]) => Number(value)), 0);
+  const leading = positive.filter(([, value]) => Number(value) === maximum).map(([element]) => element);
+  const supporting = positive.filter(([, value]) => Number(value) !== maximum && Number(value) >= maximum * 0.45).map(([element]) => element);
+  const quiet = positive.filter(([, value]) => Number(value) !== maximum && Number(value) < maximum * 0.45).map(([element]) => element);
+  const absent = entries.filter(([, value]) => Number(value) === 0).map(([element]) => element);
+  const groups = { leading, supporting, quiet, absent };
+  const parts = [];
+
+  if (locale === "ko") {
+    if (leading.length) parts.push(`${joinElementNames(leading, locale)} 기운이 가장 두드러짐`);
+    if (supporting.length) parts.push(`${joinElementNames(supporting, locale)} 기운이 함께 받쳐줌`);
+    if (quiet.length) parts.push(`${joinElementNames(quiet, locale)} 기운은 비교적 잔잔함`);
+    if (absent.length) parts.push(`${joinElementNames(absent, locale)} 기운은 이 층에 드러나지 않음`);
+  } else if (locale === "zh-CN") {
+    if (leading.length) parts.push(`${joinElementNames(leading, locale)}最突出`);
+    if (supporting.length) parts.push(`${joinElementNames(supporting, locale)}形成支撑`);
+    if (quiet.length) parts.push(`${joinElementNames(quiet, locale)}相对安静`);
+    if (absent.length) parts.push(`${joinElementNames(absent, locale)}未在这一层显现`);
+  } else if (locale === "es") {
+    if (leading.length) parts.push(`${joinElementNames(leading, locale)} tiene la mayor presencia`);
+    if (supporting.length) parts.push(`${joinElementNames(supporting, locale)} ofrece apoyo visible`);
+    if (quiet.length) parts.push(`${joinElementNames(quiet, locale)} queda en segundo plano`);
+    if (absent.length) parts.push(`${joinElementNames(absent, locale)} no aparece en esta capa`);
+  } else if (locale === "ja") {
+    if (leading.length) parts.push(`${joinElementNames(leading, locale)}が最も強く表れる`);
+    if (supporting.length) parts.push(`${joinElementNames(supporting, locale)}が支えになる`);
+    if (quiet.length) parts.push(`${joinElementNames(quiet, locale)}は比較的静か`);
+    if (absent.length) parts.push(`${joinElementNames(absent, locale)}はこの層に表れない`);
+  } else {
+    if (leading.length) parts.push(`${joinElementNames(leading, locale)} has the strongest presence`);
+    if (supporting.length) parts.push(`${joinElementNames(supporting, locale)} provides visible support`);
+    if (quiet.length) parts.push(`${joinElementNames(quiet, locale)} stays in the background`);
+    if (absent.length) parts.push(`${joinElementNames(absent, locale)} does not appear in this layer`);
+  }
+
+  return { groups, description: parts.join(locale === "zh-CN" || locale === "ja" ? "；" : "; ") };
 }
 
 function friendlyStem(stem, localeValue) {
@@ -330,8 +374,8 @@ function localizedChartFacts(chart, localeValue) {
     chartPattern: EVIDENCE_LABELS[locale].chart,
     identityCenter: friendlyStem(chart.dayMaster, locale),
     pillars: chart.pillars.map((pillar) => pillarFact(pillar, locale)),
-    visibleElementCountsAcrossStemsAndBranches: localizedElementCounts(chart.elements, locale),
-    hiddenStemWeightedFiveElements: localizedElementCounts(chart.weightedElements, locale),
+    visibleElementProfile: elementProfile(chart.elements, locale).description,
+    innerElementProfile: elementProfile(chart.weightedElements, locale).description,
     strongestElement: localizeChartText(chart.strongestElement, locale),
     quietestElement: localizeChartText(chart.weakestElement, locale),
     balanceCues: chart.helpfulElements.map((element) => localizeChartText(element, locale)),
@@ -345,8 +389,6 @@ function sectionEvidence(chart, localeValue) {
   const facts = localizedChartFacts(chart, locale);
   const labels = EVIDENCE_LABELS[locale];
   const pillars = Object.fromEntries(chart.pillars.map((pillar) => [pillar.position, pillarFact(pillar, locale)]));
-  const visible = Object.entries(facts.visibleElementCountsAcrossStemsAndBranches).map(([name, value]) => `${name} ${value}`).join(", ");
-  const weighted = Object.entries(facts.hiddenStemWeightedFiveElements).map(([name, value]) => `${name} ${value}`).join(", ");
   const relationships = facts.relationships.join("; ") || labels.none;
   const stars = facts.symbolicStars.join("; ") || labels.none;
   const balance = facts.balanceCues.join(", ");
@@ -356,7 +398,7 @@ function sectionEvidence(chart, localeValue) {
   const unique = (values) => [...new Set(values)].join("; ") || labels.none;
   return {
     core_metaphor: [`${labels.center}: ${facts.identityCenter}`, `${labels.elementPattern}: ${elementContrast(facts, locale)}`],
-    element_balance: [`${labels.visible}: ${visible}`, `${labels.weighted}: ${weighted}`, `${labels.balance}: ${balance}`],
+    element_balance: [`${labels.visible}: ${facts.visibleElementProfile}`, `${labels.weighted}: ${facts.innerElementProfile}`, `${labels.balance}: ${balance}`],
     day_master: [`${labels.identity}: ${pillars.Day.pattern}`, `${labels.inner}: ${pillars.Day.innerLayer.join("; ")}`],
     reality_check: [`${labels.links}: ${relationships}`],
     validation: [`${labels.support}: ${stars}`, `${labels.elementPattern}: ${elementContrast(facts, locale)}`],

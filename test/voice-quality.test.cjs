@@ -2,7 +2,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const { postProcessReading, readingQualityIssues, normalizeModelReading } = require("../api/generate-reading");
 const { calculateSaju } = require("../api/saju-engine");
-const { applyTechnicalEvidence, localizeChartText, localizedChartFacts, simplifyReadingNotation } = require("../api/locale-chart");
+const { applyTechnicalEvidence, localizeChartText, localizedChartFacts, sectionEvidence, simplifyReadingNotation } = require("../api/locale-chart");
 
 const keys = ["core_metaphor", "element_balance", "day_master", "reality_check", "validation", "personality", "career", "money", "love", "family", "friends", "location", "lucky_actions"];
 
@@ -49,7 +49,7 @@ test("Post-processing removes duplicated technical evidence from the prose body"
 });
 
 test("Detailed natural Korean copy can pass the quality gate", () => {
-  const body = "민아님은 겉으로 차분하게 상황을 정리하지만, 속에서는 주변의 말과 분위기를 빠르게 읽는 편이에요. 수 기운이 강하고 무토 일간이 중심을 잡는 구조라서 섬세한 감각과 현실적인 판단이 함께 움직입니다. 그동안 괜찮은 척 버텨온 순간이 있었다면 약해서가 아니라 놓치고 싶지 않은 것이 많았기 때문일 거예요. 모든 일을 한꺼번에 정리하려 하지 말고, 우선순위를 줄여 몸이 따라올 시간을 남겨주세요. 작은 경계를 세우는 일이 오히려 다정함과 집중력을 오래 지켜줍니다. 오늘은 해야 할 일을 세 가지로 줄이고, 미뤄도 되는 일 하나를 분명하게 골라보세요. 이런 작고 구체적인 선택이 쌓이면 무토의 안정감은 부담이 아니라 믿을 만한 힘으로 자리 잡습니다.";
+  const body = "민아님은 겉으로 차분하게 상황을 정리하지만, 속에서는 주변의 말과 분위기를 빠르게 읽는 편이에요. 수 기운이 강하고 무토 일간이 중심을 잡는 구조라서 섬세한 감각과 현실적인 판단이 함께 움직여요. 괜찮은 척 버티는 쪽을 택할 때가 있다면, 약해서라기보다 놓치고 싶지 않은 것이 많을 가능성이 커요. 다만 모든 변수를 직접 정리하려 들면 결정이 늦어지고 가까운 사람에게도 부담을 줄 수 있어요. 우선순위를 줄여 몸이 따라올 시간을 남겨주세요. 작은 경계를 세우는 일이 오히려 다정함과 집중력을 오래 지켜줘요. 오늘은 해야 할 일을 세 가지로 줄이고, 미뤄도 되는 일 하나를 분명하게 골라보세요. 이런 작고 구체적인 선택이 쌓이면 무토의 안정감은 부담이 아니라 믿을 만한 힘으로 자리 잡아요.";
   const reading = {
     headline: "깊은 흐름 속에서도 중심을 지켜온 사람이네요",
     summary: body,
@@ -122,6 +122,52 @@ test("English chart facts reserve Hanja and pinyin for the visual Manse chart", 
   assert.doesNotMatch(serialized, /\b(?:Jia|Yi|Bing|Ding|Wu|Ji|Geng|Xin|Ren|Gui)-(?:Zi|Chou|Yin|Mao|Chen|Si|Wu|Wei|Shen|You|Xu|Hai)\b/);
   assert.match(serialized, /Yang Fire|Yang Water|Yin Water/);
   assert.match(serialized, /identity and close relationships/);
+  assert.equal(serialized.includes("visibleElementCounts"), false);
+  assert.equal(serialized.includes("hiddenStemWeighted"), false);
+});
+
+test("Element evidence stays qualitative and hides the five-number inventory", () => {
+  const chart = calculateSaju({
+    name: "Eunji", date: "1992-04-18", time: "14:20", city: "Seoul", country: "South Korea", locale: "ko"
+  });
+  const evidence = sectionEvidence(chart, "ko").element_balance.join(" ");
+  assert.match(evidence, /두드러|받쳐|잔잔|드러나지/);
+  assert.doesNotMatch(evidence, /(?:목|화|토|금|수)\s*\d/);
+  assert.doesNotMatch(evidence, /\d+\.\d+/);
+});
+
+test("Korean post-processing removes numeric inventories and editor asides", () => {
+  const reading = {
+    headline: "무토가 중심을 잡는 사람",
+    summary: "목2, 화0, 토1, 금4, 수1이고 속까지 합하면 목2, 화0, 토1.35, 금5.05, 수1.7로 나타납니다. 금 기운이 판단을 빠르게 세우는 쪽으로 작용해요.\"",
+    sections: [{ key: "element_balance", title: "오행", body: "목2, 화0, 토1, 금4, 수1입니다. (이 한 문장은 지지의 제안입니다.) 결정을 내린 뒤에는 이유를 한 번 더 확인하는 편이 좋아요. 근거: 금 기운이 강한 분포입니다. (일간 표기는 이 한 문장에만 사용했습니다.)", technicalBasis: "목2, 화0, 토1, 금4, 수1" }],
+    luckyActions: ["좋아요. 기록해보세요."],
+    disclaimer: ""
+  };
+  const result = postProcessReading(reading, "ko");
+  const serialized = JSON.stringify(result);
+  assert.equal(serialized.includes("목2"), false);
+  assert.equal(serialized.includes("5.05"), false);
+  assert.equal(serialized.includes("지지의 제안"), false);
+  assert.equal(serialized.includes("일간 표기는"), false);
+  assert.equal(serialized.includes("근거:"), false);
+  assert.match(result.summary, /금 기운/);
+  assert.doesNotMatch(result.summary, /[\"”']$/);
+  assert.match(result.sections[0].body, /이유를 한 번 더 확인/);
+});
+
+test("Korean quality gate rejects blanket reassurance and numeric element prose", () => {
+  const body = "지금 방식도 괜찮아요. 천천히 가도 괜찮아요. 이미 충분해요. 지금도 잘하고 있어요. 그대로 해도 좋아요. 목2, 화0, 토1, 금4, 수1로 나타납니다.";
+  const reading = {
+    headline: "괜찮아요",
+    summary: body,
+    sections: keys.map((key) => ({ key, title: "위로", body, technicalBasis: "근거" })),
+    luckyActions: []
+  };
+  const issues = readingQualityIssues(reading, "ko");
+  assert.ok(issues.some((issue) => issue.includes("위로 표현")));
+  assert.ok(issues.some((issue) => issue.includes("numeric Five Element")));
+  assert.ok(issues.some((issue) => issue.includes("일방적인 위로")));
 });
 
 test("Reading notation is translated into meaning instead of repeated", () => {

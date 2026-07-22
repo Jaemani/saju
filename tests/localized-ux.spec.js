@@ -75,6 +75,11 @@ test("Korean loading and result present a clear reading flow", async ({ page }) 
   await page.screenshot({ path: "docs/audits/2026-07-22/10-loading-ko-desktop.png", fullPage: true });
   await expect(page.locator("#resultView")).toBeVisible();
   await expect(page.getByText("이렇게 읽은 이유").first()).toBeVisible();
+  await expect(page.locator(".reading-group")).toHaveCount(4);
+  await expect(page.getByText("진로와 일", { exact: true })).toBeVisible();
+  await expect(page.getByText("재물과 소비", { exact: true })).toBeVisible();
+  await expect(page.getByText("연애와 친밀감", { exact: true })).toBeVisible();
+  await expect(page.getByText("대인관계", { exact: true })).toBeVisible();
   await page.screenshot({ path: "docs/audits/2026-07-22/11-result-ko-desktop.png", fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({ path: "docs/audits/2026-07-22/12-result-ko-mobile.png", fullPage: true });

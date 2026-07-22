@@ -23,6 +23,8 @@ The selected locale is stored in `localStorage` and included in the reading requ
 
 The product uses two presentation layers. The visual Manse chart preserves canonical Hanja and pronunciation labels so a knowledgeable reader can verify the calculation. Reading titles, bodies, actions, and expandable evidence translate those markers into meaning: `Yang Fire over Tiger (Wood)`, `structure and responsibility`, or `a subtle friction pattern`. Raw eight-character strings, pinyin pillar codes, and branch-code relationships do not belong in prose.
 
+Exact Five Element values also belong to the visual chart. Prose and expandable evidence use qualitative language instead: one energy leads, another supports it, another stays quiet, or does not appear in that layer. The model never receives a five-item numeric inventory to repeat.
+
 Dates, element counts, pillar ownership, Ten God relationships, and relationship markers must not change during the writing passes. The server may change notation only by replacing a calculated marker with its locale-specific semantic equivalent.
 
 Colors, jewelry, plants, room directions, and similar objects are not presented as causal remedies. Suggested actions must be ordinary, low-risk experiments such as changing a schedule, writing down a decision, asking for help, or setting a boundary.
@@ -30,6 +32,8 @@ Colors, jewelry, plants, room directions, and similar objects are not presented 
 ## Shared Voice Rules
 
 - Recognize the pressure or contradiction before offering advice.
+- Let analysis be the visible form and empathy the underlying stance. Warmth does not require agreeing with every habit or ending every section with reassurance.
+- Keep direct correction selective. The reality-check section and a few evidence-backed domains may name a practical cost; other sections can remain observational.
 - Tie emotional observations to a chart marker. Do not invent biography, trauma, or family events.
 - Keep direct sections protective. No humiliation, scolding, or deterministic claims.
 - Use one useful metaphor rather than stacking poetic images.
@@ -40,6 +44,8 @@ Colors, jewelry, plants, room directions, and similar objects are not presented 
 ## Korean
 
 The Korean rules incorporate the local `humanize-korean` quick rules: remove translation-shaped phrases, repeated formal nouns, mechanical connectors, uniform endings, inflated reassurance, and unnecessary English words. The product uses a steady `해요체`, limits repeated `거든요` and `답니다`, and prefers `풀이` over `리딩` and `오행/기운` over the generic `요소` when discussing the chart.
+
+Korean evidence is woven into the observation itself: `무토가 중심을 잡고 수 기운이 강해, 판단은 현실적이지만 생각은 오래 이어져요.` Do not append `근거:` sentences, announce that a term was used once, or describe a sentence as supportive. Expressions such as `괜찮아요`, `좋아요`, and `충분해요` are allowed sparingly; they cannot replace analysis.
 
 Korean prose uses forms such as `병화`, `병인일주의 흐름`, and `수 기운` instead of repeatedly showing `丙`, `丙寅`, or `Bing-Yin`. Chinese and Japanese may use native characters when they improve readability, but never add pinyin or romanized pillar codes. English and Spanish prose use no chart Hanja.
 
