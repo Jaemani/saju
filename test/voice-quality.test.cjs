@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { postProcessReading, readingQualityIssues } = require("../api/generate-reading");
+const { postProcessReading, readingQualityIssues, normalizeModelReading } = require("../api/generate-reading");
 const { calculateSaju } = require("../api/saju-engine");
 const { applyTechnicalEvidence, localizeChartText } = require("../api/locale-chart");
 
@@ -125,4 +125,11 @@ test("Quality gate catches a stem assigned to the wrong pillar", () => {
   };
   const issues = readingQualityIssues(reading, "zh-CN", chart);
   assert.ok(issues.some((issue) => issue.includes("wrong pillar")));
+});
+
+test("Structured section object normalizes to all required keys in order", () => {
+  const sections = Object.fromEntries(keys.map((key) => [key, { title: key, body: `${key} body` }]));
+  const result = normalizeModelReading({ sections });
+  assert.deepEqual(result.sections.map((section) => section.key), keys);
+  assert.equal(result.sections[12].title, "lucky_actions");
 });

@@ -23,6 +23,16 @@ const SECTION_PURPOSES = {
   lucky_actions: "Offer four to six low-risk, measurable experiments that follow from the report and require no purchase."
 };
 
+const SECTION_CONTENT_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["title", "body"],
+  properties: {
+    title: { type: "string" },
+    body: { type: "string", minLength: 340, maxLength: 1100 }
+  }
+};
+
 const RESPONSE_SCHEMA = {
   type: "object",
   additionalProperties: false,
@@ -31,20 +41,10 @@ const RESPONSE_SCHEMA = {
     headline: { type: "string" },
     summary: { type: "string" },
     sections: {
-      type: "array",
-      minItems: 13,
-      maxItems: 13,
-      items: {
-        type: "object",
-        additionalProperties: false,
-        required: ["key", "title", "body", "technicalBasis"],
-        properties: {
-          key: { type: "string" },
-          title: { type: "string" },
-          body: { type: "string", minLength: 340, maxLength: 1100 },
-          technicalBasis: { type: "string" }
-        }
-      }
+      type: "object",
+      additionalProperties: false,
+      required: REQUIRED_SECTION_KEYS,
+      properties: Object.fromEntries(REQUIRED_SECTION_KEYS.map((key) => [key, SECTION_CONTENT_SCHEMA]))
     },
     luckyActions: {
       type: "array",
@@ -85,19 +85,19 @@ function buildPrompt(chart) {
   const evidence = sectionEvidence(chart, voice.locale);
   return [
     `You are SajuPop, a Korean Saju/Four Pillars reader writing in ${voice.name}.`,
-    `Output locale: ${voice.locale}. Write every user-facing string in that language, including headline, summary, titles, bodies, technicalBasis, luckyActions, and disclaimer. Keep JSON keys in English.`,
+    `Output locale: ${voice.locale}. Write every user-facing string in that language, including headline, summary, titles, bodies, luckyActions, and disclaimer. Keep JSON keys in English.`,
     "Write with the detail, affection, emotional specificity, and occasional directness of a premium Korean micro-reading, but do not imitate or copy any source text.",
     "The objective chart data is already calculated by a library-backed Manse engine. The localized fact block below is the only factual source you may use.",
     "Do not recount stems, move a marker to another pillar, infer an absent marker, or turn a symbolic star into a promised event. If a fact is not in the block, leave it out.",
     "Explain Korean Saju concepts for a first-time reader. Keep the original Hanja, pinyin, and proper chart names when useful, then explain them naturally in the output language.",
     "Use the person's name naturally. Do not repeat it at the start of every section.",
     "Safety rules: no medical, legal, psychological diagnosis, guaranteed wealth, guaranteed marriage, curses, or deterministic fear claims.",
-    `Return exactly these 13 section keys once each, in this order: ${REQUIRED_SECTION_KEYS.join(", ")}.`,
+    `Return sections as an object with exactly these 13 required properties: ${REQUIRED_SECTION_KEYS.join(", ")}. Each property contains only title and body.`,
     "Do not collapse sections into generic advice. Each one needs at least one concrete chart reference and one recognizable life pattern.",
     "For each section, refer only to the facts listed under that section key in SECTION EVIDENCE. Do not derive parents, childhood, trauma, health, wealth, marriage, or a future event from missing information.",
     "Use no more than one compact chart-evidence sentence in most bodies; the element-balance section may use two. Spend the remaining sentences on lived nuance, emotional recognition, and a grounded adjustment.",
     "Do not use a symbolic star as proof for a Ten God, a hidden stem as proof for a visible pillar, or a combination as proof that a helper, partner, or event will appear.",
-    "Write technicalBasis briefly because the server will replace it with verified evidence. Never place writing instructions or notes to the editor in any user-facing field.",
+    "Do not write technicalBasis or a labeled evidence line. The server adds verified technical evidence after generation. Never place writing instructions or notes to the editor in any user-facing field.",
     "Write luckyActions as low-risk experiments. Do not include element-colored objects, plants, accessories, directions, percentages, investment instructions, or claims that an action changes fate.",
     "",
     "Voice rules:",
@@ -119,7 +119,7 @@ function readingQualityIssues(reading, locale, chart) {
   const bodies = (reading.sections || []).map((section) => String(section.body || ""));
   const technical = (reading.sections || []).map((section) => String(section.technicalBasis || ""));
   const averageLength = bodies.length ? bodies.reduce((sum, body) => sum + body.length, 0) / bodies.length : 0;
-  const minimumAverage = { ko: 300, "zh-CN": 240, ja: 260, en: 560, es: 560 }[locale] || 500;
+  const minimumAverage = { ko: 270, "zh-CN": 220, ja: 240, en: 520, es: 520 }[locale] || 480;
   const issues = [];
   const keys = (reading.sections || []).map((section) => section.key);
   const missingKeys = REQUIRED_SECTION_KEYS.filter((key) => !keys.includes(key));
@@ -205,8 +205,8 @@ function readingQualityIssues(reading, locale, chart) {
     if (technical.some((text) => /^(manse|elements|dayMaster|relationshipTags|helpfulElements):/m.test(text))) {
       issues.push("technicalBasis still uses English property labels; explain those labels in Korean.");
     }
-    const shortBodies = bodies.filter((body) => body.length < 280).length;
-    if (shortBodies) issues.push(`${shortBodies} Korean section bodies are under 280 characters.`);
+    const shortBodies = bodies.filter((body) => body.length < 250).length;
+    if (shortBodies) issues.push(`${shortBodies} Korean section bodies are under 250 characters.`);
   }
   if (locale === "zh-CN" && (allText.match(/这意味着/g) || []).length > 3) issues.push("'这意味着' is repeated too often.");
   if (locale === "zh-CN" && (allText.match(/承认/g) || []).length > 2) issues.push("'承认' is repeated too often; show understanding directly instead of announcing it.");
@@ -218,6 +218,7 @@ function readingQualityIssues(reading, locale, chart) {
 function postProcessReading(reading, locale) {
   const stripEmbeddedEvidence = (value) => String(value || "")
     .replace(/\n+\s*(?:technicalBasis|technical basis|기술 근거|技术依据|技術的根拠)\s*[:：][\s\S]*$/i, "")
+    .replace(/\n+\s*[（(](?:근거|依据|根拠|base técnica)\s*[:：][\s\S]*[）)]\s*$/i, "")
     .trim();
   const transform = (replaceText, replaceTechnical = replaceText) => ({
     ...reading,
@@ -247,8 +248,20 @@ function postProcessReading(reading, locale) {
         .replaceAll("감정 흡수", "주변 분위기를 받아들이는 일")
         .replaceAll("신경계 조절", "마음의 속도를 가라앉히는 일")
         .replaceAll("숨은줄기", "지장간")
+        .replaceAll("숨은간", "지장간")
+        .replaceAll("숨겨진간", "지장간")
+        .replaceAll("내부 규준", "내 기준")
         .replaceAll("비용 있는 습관", "오래 이어지면 지치는 습관")
-        .replaceAll("에너지를 아끼", "힘을 아끼");
+        .replaceAll("에너지를 아끼", "힘을 아끼")
+        .replaceAll("내부 에너지", "속의 힘")
+        .replaceAll("외부 정보", "주변에서 들어오는 정보")
+        .replaceAll("가시적 오행", "보이는 오행")
+        .replaceAll("수우세", "수 기운 우세")
+        .replaceAll("합작용", "합의 작용")
+        .replaceAll("수적 연결", "수 기운의 관계")
+        .replaceAll("소액·단기간", "작은 범위·짧은 기간")
+        .replace(/이 풀이에서는\s*/g, "")
+        .replace(/([A-Za-z가-힣])\s+님/g, "$1님");
     }
     if (locale === "zh-CN") {
       text = text
@@ -298,7 +311,7 @@ function buildRepairPrompt(chart, reading, issues) {
   const evidence = sectionEvidence(chart, voice.locale);
   return [
     `The previous ${voice.name} polish did not pass the product's native-voice checks. Repair the JSON once.`,
-    "Keep all chart facts, section keys, and JSON structure unchanged. The localized fact block is the only factual source.",
+    "Keep all chart facts and section keys unchanged. Return sections as an object whose 13 required properties each contain only title and body; the server adds key and technicalBasis later. The localized fact block is the only factual source.",
     "Fix every listed issue. Expand thin sections with chart-specific emotional detail and practical nuance, not filler.",
     "Do not describe the editing process, mention these checks, or repeat phrases from these instructions in the output.",
     "Never claim the user described an experience. Never recommend colors, objects, plants, directions, or elemental remedies.",
@@ -407,6 +420,14 @@ function extractOutputText(data) {
   return chunks.join("\n");
 }
 
+function normalizeModelReading(reading) {
+  if (Array.isArray(reading.sections)) return reading;
+  return {
+    ...reading,
+    sections: REQUIRED_SECTION_KEYS.map((key) => ({ key, ...(reading.sections?.[key] || {}) }))
+  };
+}
+
 async function requestStructuredReading(model, prompt, instructions) {
   const payload = {
     model,
@@ -434,7 +455,7 @@ async function requestStructuredReading(model, prompt, instructions) {
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.error?.message || `OpenAI request failed with ${response.status}`);
-  return JSON.parse(extractOutputText(data));
+  return normalizeModelReading(JSON.parse(extractOutputText(data)));
 }
 
 async function callOpenAI(chart) {
@@ -515,3 +536,4 @@ module.exports.calculateSaju = calculateSaju;
 module.exports.fallbackReading = fallbackReading;
 module.exports.readingQualityIssues = readingQualityIssues;
 module.exports.postProcessReading = postProcessReading;
+module.exports.normalizeModelReading = normalizeModelReading;
