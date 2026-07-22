@@ -12,3 +12,4 @@ sajupop-*.json
 test-results/
 playwright-report/
 _workspace/
+.env*.local

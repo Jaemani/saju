@@ -12,6 +12,10 @@ if (!SERVICE_ACCOUNT) {
 
 const serviceAccount = JSON.parse(fs.readFileSync(SERVICE_ACCOUNT, "utf8"));
 const projectId = serviceAccount.project_id;
+const extraAuthorizedDomains = String(process.env.FIREBASE_AUTH_EXTRA_DOMAINS || "")
+  .split(",")
+  .map((domain) => domain.trim().replace(/^https?:\/\//, "").replace(/\/$/, ""))
+  .filter(Boolean);
 
 function base64url(input) {
   return Buffer.from(input)
@@ -158,7 +162,9 @@ async function tryEnableIdentityToolkit(token) {
             "localhost",
             `${projectId}.firebaseapp.com`,
             `${projectId}.web.app`,
-            "saju-sable-nine.vercel.app"
+            "saju-pop.vercel.app",
+            "saju-sable-nine.vercel.app",
+            ...extraAuthorizedDomains
           ]
         })
       }
@@ -188,6 +194,22 @@ const envMap = {
   FIREBASE_APP_ID: config.appId,
   FIREBASE_MEASUREMENT_ID: config.measurementId || ""
 };
+
+if (process.argv.includes("--write-local")) {
+  const localPath = ".env.local";
+  const existingLines = fs.existsSync(localPath) ? fs.readFileSync(localPath, "utf8").split(/\r?\n/) : [];
+  const pending = new Map(Object.entries(envMap).filter(([, value]) => value));
+  const updatedLines = existingLines.map((line) => {
+    const match = line.match(/^([A-Z0-9_]+)=/);
+    if (!match || !pending.has(match[1])) return line;
+    const value = pending.get(match[1]);
+    pending.delete(match[1]);
+    return `${match[1]}=${JSON.stringify(value)}`;
+  });
+  for (const [key, value] of pending) updatedLines.push(`${key}=${JSON.stringify(value)}`);
+  fs.writeFileSync(localPath, `${updatedLines.filter((line, index, lines) => line || index < lines.length - 1).join("\n")}\n`);
+  console.log("Firebase web config: written to ignored .env.local");
+}
 
 for (const [key, value] of Object.entries(envMap)) {
   if (value) await setVercelEnv(key, value);
